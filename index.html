@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMO-Matnog — Arrival/Departure Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
+:root {
   --bg:#0f2126;
   --panel:#0d2a2f;
   --header:#0e1823;
@@ -24,9 +23,8 @@
   --radius:10px;
 }
 
-/* 👇 Add this block here */
-body::before {
-  content: "";
+/* ---------- BACKGROUND IMAGE AT TOP ---------- */
+.top-bg {
   position: fixed;
   top: 0;
   left: 0;
@@ -34,171 +32,206 @@ body::before {
   height: 35vh;
   background: url('images/matnog_ports.png') no-repeat center top;
   background-size: cover;
-  opacity: 0.42;
   mix-blend-mode: luminosity;
+  opacity: 0.42;
   z-index: -1;
-  pointer-events: none;
 }
 
-/* your existing body and other CSS below */
-html,body{
-  height:100%;
-  margin:0;
-  font-family:'Montserrat',system-ui,Segoe UI,Roboto,Arial;
-  background:linear-gradient(180deg,#07121a 0%,#071a1f 50%),var(--bg);
-  color:var(--white);
-  -webkit-font-smoothing:antialiased;
+/* ---------- GENERAL ---------- */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Montserrat', system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg,#07121a 0%,#071a1f 50%), var(--bg);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-header{background:var(--header);padding:16px 24px;border-bottom:3px solid var(--accent);display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,0.6);}
-header .brand{display:flex;align-items:center;gap:18px;}
-header .logo{width:70px;height:70px;background:#0b2b33;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;}
-header h1{margin:0;font-size:2rem;color:var(--white);}
-header .timebox{text-align:right;}
-header .timebox .date{font-size:0.9rem;color:var(--muted);}
-header .timebox .time{font-size:2.5rem;font-weight:800;}
-
-main{padding:20px;display:flex;flex-direction:column;gap:20px;}
-.panel{background:var(--panel);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.5);}
-.title{background:var(--accent-dark);padding:12px 16px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;color:#fff;}
-.content{padding:12px 16px;overflow:auto;}
-
-table{width:100%;border-collapse:collapse;border-left:1px solid rgba(255,255,255,0.05);}
-thead th{padding:10px 8px;text-align:center;font-weight:700;font-size:0.9rem;background:var(--accent);color:#fff;border-right:1px solid rgba(255,255,255,0.1);}
-tbody td{padding:12px 8px;text-align:center;font-size:1rem;border-bottom:1px solid rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.05);}
-tbody td:last-child,thead th:last-child{border-right:none;}
-tbody tr:nth-child(odd){background:rgba(255,255,255,0.01);}
-
-.logos {
+/* ---------- HEADER ---------- */
+header {
   display: flex;
   align-items: center;
-  gap: 12px; /* space between logos */
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(7,31,42,0.9);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: white;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
-.logo {
-  height: 48px; /* reduce size here */
+header .logos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+header .logo {
+  height: 60px;
   width: auto;
 }
 
-.status{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:700;min-width:120px;text-align:center;color:#071018;}
-.status.loading{background:var(--loading);animation:flashLoading 1.2s linear infinite;}
-.status.unloading{background:var(--unloading);}
-.status.standby-load{background:var(--standby);}
-.status.standby-depart{background:var(--standby-dep);}
-.status.anchorage{background:var(--anchorage);color:#fff;opacity:.92;}
-@keyframes flashLoading{0%,100%{opacity:1}50%{opacity:.35;}}
-
-footer{padding:10px;text-align:center;color:var(--muted);font-size:.9rem;background:var(--header);border-top:2px solid var(--accent);}
-
-/* ---------------- RESPONSIVE DESIGN ---------------- */
-
-/* For tablets (width below 1024px) */
-@media (max-width: 1024px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  header .brand h1 {
-    font-size: 1.5rem;
-    text-align: left;
-  }
-
-  header .logos {
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-
-  header .timebox {
-    align-self: flex-end;
-  }
-
-  main {
-    padding: 12px;
-    gap: 12px;
-  }
-
-  table th, table td {
-    font-size: 0.85rem;
-    padding: 6px;
-  }
-
-  .status {
-    min-width: 90px;
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
+.brand h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--white);
+  text-align: center;
 }
 
-/* For phones (width below 600px) */
-@media (max-width: 600px) {
-  header {
-    padding: 10px 16px;
-  }
-
-  header .logos {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .logo {
-    height: 40px;
-  }
-
-  header .brand h1 {
-    font-size: 1.2rem;
-    line-height: 1.3;
-  }
-
-  header .timebox .time {
-    font-size: 1.8rem;
-  }
-
-  .title {
-    font-size: 0.9rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  table th, table td {
-    font-size: 0.8rem;
-    padding: 4px 6px;
-  }
-
-  footer {
-    font-size: 0.8rem;
-  }
+.timebox {
+  text-align: right;
 }
 
+.timebox .date {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.timebox .time {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* ---------- MAIN ---------- */
+main {
+  padding: 20px;
+  margin-top: 120px; /* prevents overlap with fixed header */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.title {
+  background: var(--accent-dark);
+  padding: 12px 16px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.content {
+  padding: 12px 16px;
+  overflow: auto;
+}
+
+/* ---------- TABLE ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th, td {
+  padding: 10px 8px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+thead th {
+  background: var(--accent);
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+tbody tr:nth-child(odd) {
+  background: rgba(255,255,255,0.03);
+}
+
+/* ---------- STATUS ---------- */
+.status {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  min-width: 120px;
+  text-align: center;
+  color: #071018;
+}
+.status.loading { background: var(--loading); animation: flashLoading 1.2s linear infinite; }
+.status.unloading { background: var(--unloading); }
+.status.standby-load { background: var(--standby); }
+.status.standby-depart { background: var(--standby-dep); }
+.status.anchorage { background: var(--anchorage); color: #fff; opacity:.92; }
+
+@keyframes flashLoading {
+  0%,100% {opacity: 1;}
+  50% {opacity: .35;}
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+  padding: 10px;
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+  background: var(--header);
+  border-top: 2px solid var(--accent);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1024px) {
+  header {flex-wrap: wrap; justify-content: center; gap: 10px;}
+  header .logo {height: 50px;}
+  .brand h1 {font-size: 1.4rem;}
+  .timebox .time {font-size: 1.5rem;}
+}
+@media (max-width:600px) {
+  header {flex-direction: column; gap: 6px; text-align: center;}
+  header .logo {height: 40px;}
+  .brand h1 {font-size: 1.1rem;}
+  .timebox .time {font-size: 1.3rem;}
+  main {margin-top: 160px;}
+}
 </style>
+
+
 </head>
 <body>
 
-<header>
-  <div class="logos">
-    <img src="C:\Users\PPA\port-dashboard\images\bagong_pilipinas.png" class="logo" alt="PPA Logo">
-	<img src="C:\Users\PPA\port-dashboard\images\ppa_logo.png" class="logo" alt="PPA Logo">
-  </div>
-  <div class="brand">
-    <h1>TMO-Matnog — Arrival/Departure</h1>
-  </div>
-  <div class="timebox">
-    <div class="date" id="currentDate">—</div>
-    <div class="time" id="currentTime">—</div>
-  </div>
-</header>
+  <!-- Must come first, just after <body> -->
+  <div class="top-bg"></div>
+
+  <header>
+    <div class="logos">
+      <img src="images/bagong_pilipinas.png" class="logo" alt="Bagong Pilipinas Logo">
+      <img src="images/ppa_logo.png" class="logo" alt="PPA Logo">
+    </div>
+    <div class="brand">
+      <h1>TMO-Matnog — Arrival/Departure</h1>
+    </div>
+    <div class="timebox">
+      <div class="date" id="currentDate">—</div>
+      <div class="time" id="currentTime">—</div>
+    </div>
+  </header>
+
+  <!-- your main and footer follow -->
+
 
 <main>
   <section class="panel">
-    <div class="title">Active Vessels at Berth <span id="lastUpdated" style="font-weight:400;font-size:.9rem;color:#fff;">Last updated: —</span></div>
+    <div class="title">
+      Active Vessels at Berth 
+      <span id="lastUpdated" style="font-weight:400;font-size:.9rem;color:#fff;">Last updated: —</span>
+    </div>
     <div class="content">
       <table>
         <thead>
@@ -213,7 +246,9 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:.9rem;backgro
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="activeBody"><tr><td colspan="8" style="opacity:.6">Loading...</td></tr></tbody>
+        <tbody id="activeBody">
+          <tr><td colspan="8" style="opacity:.6">Loading...</td></tr>
+        </tbody>
       </table>
     </div>
   </section>
@@ -231,7 +266,9 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:.9rem;backgro
             <th>ETA</th>
           </tr>
         </thead>
-        <tbody id="incomingBody"><tr><td colspan="5" style="opacity:.6">Loading...</td></tr></tbody>
+        <tbody id="incomingBody">
+          <tr><td colspan="5" style="opacity:.6">Loading...</td></tr>
+        </tbody>
       </table>
       <div id="lastCheckedBottom" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Checked: —</div>
     </div>
@@ -241,17 +278,71 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:.9rem;backgro
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
 
 <script>
-const oneDriveJSON="https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
+const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
-function formatTIME(val){if(!val)return"—";const d=val.replace(/\D/g,'');if(d.length<3)return val;let h=d.slice(0,d.length-2).padStart(2,'0');let m=d.slice(-2).padStart(2,'0');return `${h}:${m}`;}
+function formatTIME(val){
+  if(!val) return "—";
+  const d = val.replace(/\D/g,'');
+  if(d.length < 3) return val;
+  let h = d.slice(0,d.length-2).padStart(2,'0');
+  let m = d.slice(-2).padStart(2,'0');
+  return `${h}:${m}`;
+}
 
-function updateDashboard(ramps,incoming){const a=document.getElementById('activeBody');const i=document.getElementById('incomingBody');a.innerHTML='';i.innerHTML='';ramps.forEach(r=>{a.innerHTML+=`<tr><td>${r["Ramp Num"]||"—"}</td><td>${r["Vessel Name"]||"—"}</td><td>${r["Shipping Lines"]||"—"}</td><td>${r["Last Port"]||"—"}</td><td>${r["Next Port"]||"—"}</td><td>${formatTIME(r["ETA"])}</td><td>${formatTIME(r["ETD"])}</td><td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td></tr>`;});incoming.forEach(r=>{i.innerHTML+=`<tr><td>${r["Vessel Name"]||"—"}</td><td>${r["Shipping Lines"]||"—"}</td><td>${r["Last Port"]||"—"}</td><td>${r["Next Port"]||"—"}</td><td>${formatTIME(r["ETA"])}</td></tr>`;});}
+function updateDashboard(ramps,incoming){
+  const a = document.getElementById('activeBody');
+  const i = document.getElementById('incomingBody');
+  a.innerHTML = '';
+  i.innerHTML = '';
+  ramps.forEach(r=>{
+    a.innerHTML += `<tr>
+      <td>${r["Ramp Num"]||"—"}</td>
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Next Port"]||"—"}</td>
+      <td>${formatTIME(r["ETA"])}</td>
+      <td>${formatTIME(r["ETD"])}</td>
+      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>
+    </tr>`;
+  });
+  incoming.forEach(r=>{
+    i.innerHTML += `<tr>
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Next Port"]||"—"}</td>
+      <td>${formatTIME(r["ETA"])}</td>
+    </tr>`;
+  });
+}
 
-function updateTime(){const d=new Date();const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];document.getElementById('currentDate').textContent=`${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;document.getElementById('currentTime').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;document.getElementById('lastCheckedBottom').textContent=`Last Checked: ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;document.getElementById('lastUpdated').textContent=`Last updated: ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function updateTime(){
+  const d = new Date();
+  const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('currentDate').textContent = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  document.getElementById('currentTime').textContent = timeStr;
+  document.getElementById('lastCheckedBottom').textContent = `Last Checked: ${timeStr}`;
+  document.getElementById('lastUpdated').textContent = `Last updated: ${timeStr}`;
+}
 
-async function fetchJSON(){try{const url=`${oneDriveJSON}?nocache=${Date.now()}`;const res=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);const data=await res.json();updateDashboard(data.latestRampOccupants||[],data.incomingVessels||[]);updateTime();}catch(e){console.error('Fetch error:',e);}}
+async function fetchJSON(){
+  try {
+    const url = `${oneDriveJSON}?nocache=${Date.now()}`;
+    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
+    updateTime();
+  } catch(e) {
+    console.error('Fetch error:', e);
+  }
+}
 
-updateTime();fetchJSON();setInterval(fetchJSON,10000);
+updateTime();
+fetchJSON();
+setInterval(fetchJSON, 10000);
 </script>
+
 </body>
 </html>
