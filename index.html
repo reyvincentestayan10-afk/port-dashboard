@@ -52,7 +52,7 @@ footer{padding:8px 12px;text-align:center;color:var(--muted);font-size:.9rem;bac
     <div class="content">
       <table>
         <thead><tr><th class="ramp-col">Ramp</th><th>Vessel</th><th>Shipping Lines</th><th>Last Port</th><th>Next Port</th><th>ETA</th><th>ETD</th><th>Status</th></tr></thead>
-        <tbody id="activeBody"><tr><td colspan="6" style="opacity:.6">Loading...</td></tr></tbody>
+        <tbody id="activeBody"><tr><td colspan="8" style="opacity:.6">Loading...</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -72,35 +72,27 @@ footer{padding:8px 12px;text-align:center;color:var(--muted);font-size:.9rem;bac
 <footer>⛴ Data source: OneDrive Excel (auto-refresh every 2 min)</footer>
 
 <script>
-const jsonURL = "https://my-json-proxy.YOURACCOUNT.workers.dev";
-let lastRampJSON = null;
-let lastIncomingJSON = null;
+const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
 async function fetchJSONData() {
   try {
-    showToast("Fetching latest data...", "⏳");
+    showToast("Fetching live data...", "⏳");
 
-    const fullURL = `${jsonURL}?nocache=${Date.now()}`;
-    const res = await fetch(fullURL, { cache: "no-store" });
+    // Use AllOrigins proxy to bypass CORS
+    const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(oneDriveJSON));
     if (!res.ok) throw new Error("Failed to fetch JSON file");
 
     const data = await res.json();
+    console.log("Fetched JSON:", data);
+
     const rampRows = data.latestRampOccupants || [];
     const incomingRows = data.incomingVessels || [];
 
-    // Only update if data changed
-    if (JSON.stringify(rampRows) !== JSON.stringify(lastRampJSON) ||
-        JSON.stringify(incomingRows) !== JSON.stringify(lastIncomingJSON)) {
-      updateDashboard(rampRows, incomingRows);
-      lastRampJSON = rampRows;
-      lastIncomingJSON = incomingRows;
-      showToast("Dashboard updated ✅", "📊");
-    } else {
-      console.log("No changes, skipping DOM update.");
-    }
+    updateDashboard(rampRows, incomingRows);
+    showToast("Data updated successfully ✅", "📊");
   } catch (err) {
-    console.error("❌ Fetch error:", err);
-    showToast("Error loading live data", "⚠️");
+    console.error(err);
+    showToast("Error fetching data", "⚠️");
   }
 }
 
@@ -108,49 +100,51 @@ function updateDashboard(rampRows, incomingRows) {
   const activeBody = document.getElementById("activeBody");
   const incomingBody = document.getElementById("incomingBody");
 
-  // Use DocumentFragment for smoother updates
-  const activeFrag = document.createDocumentFragment();
-  const incomingFrag = document.createDocumentFragment();
-
-  rampRows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="ramp-col">${r["Ramp Num"] || "—"}</td>
-      <td>${r["Vessel Name"] || "—"}</td>
-      <td>${r["Shipping Lines"] || "—"}</td>
-      <td>${r["Last Port"] || "—"}</td>
-      <td>${r["Next Port"] || "—"}</td>
-      <td>${r["ETA"] || "—"}</td>
-      <td>${r["ETD"] || "—"}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g, '-') || ''}">${r["Status"] || "—"}</span></td>
-    `;
-    activeFrag.appendChild(tr);
-  });
-
-  incomingRows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r["Vessel Name"] || "—"}</td>
-      <td>${r["Shipping Lines"] || "—"}</td>
-      <td>${r["Last Port"] || "—"}</td>
-      <td>${r["Next Port"] || "—"}</td>
-      <td>${r["ETA"] || "—"}</td>
-    `;
-    incomingFrag.appendChild(tr);
-  });
-
-  // Clear old rows and append new ones
   activeBody.innerHTML = "";
   incomingBody.innerHTML = "";
-  activeBody.appendChild(activeFrag);
-  incomingBody.appendChild(incomingFrag);
+
+  // Active Vessels
+  rampRows.forEach(r => {
+    activeBody.innerHTML += `
+      <tr>
+        <td class="ramp-col">${r["Ramp Num"] || "—"}</td>
+        <td>${r["Vessel Name"] || "—"}</td>
+        <td>${r["Shipping Lines"] || "—"}</td>
+        <td>${r["Last Port"] || "—"}</td>
+        <td>${r["Next Port"] || "—"}</td>
+        <td>${r["ETA"] || "—"}</td>
+        <td>${r["ETD"] || "—"}</td>
+        <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g, '-') || ""}">${r["Status"] || "—"}</span></td>
+      </tr>`;
+  });
+
+  // Incoming Vessels
+  incomingRows.forEach(r => {
+    incomingBody.innerHTML += `
+      <tr>
+        <td>${r["Vessel Name"] || "—"}</td>
+        <td>${r["Shipping Lines"] || "—"}</td>
+        <td>${r["Last Port"] || "—"}</td>
+        <td>${r["Next Port"] || "—"}</td>
+        <td>${r["ETA"] || "—"}</td>
+      </tr>`;
+  });
 }
 
-// Manual refresh button
+function showToast(msg, icon) {
+  const wrap = document.getElementById("toastWrap");
+  const t = document.createElement("div");
+  t.className = "toast show";
+  t.innerHTML = `<span class="icon">${icon}</span><span class="msg">${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(()=>{ t.classList.remove("show"); setTimeout(()=>t.remove(), 500); }, 3500);
+}
+
 document.getElementById("refreshBtn").addEventListener("click", fetchJSONData);
 
-// Auto-refresh every 5 seconds
 fetchJSONData();
-setInterval(fetchJSONData, 5000);
-
+setInterval(fetchJSONData, 120000); // refresh every 2 minutes
 </script>
+
+</body>
+</html>
