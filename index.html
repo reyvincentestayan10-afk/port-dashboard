@@ -78,18 +78,9 @@ async function fetchJSONData() {
   try {
     showToast("Fetching latest data...", "⏳");
 
-    // GitHub Raw URL + cache-busting timestamp
-    const jsonURL = `https://raw.githubusercontent.com/reyvincentestayan10-afk/port-dashboard/main/dashboard_data.json?cb=${Date.now()}`;
-
-    const res = await fetch(jsonURL, {
-      cache: "no-store", // ignore cached versions
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
-    });
-
+    // 🚀 Use AllOrigins to bypass GitHub CDN cache
+    const fullURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(jsonURL)}&cb=${Date.now()}`;
+    const res = await fetch(fullURL);
     if (!res.ok) throw new Error("Failed to fetch JSON file");
 
     const data = await res.json();
@@ -102,9 +93,10 @@ async function fetchJSONData() {
     showToast("Dashboard updated successfully ✅", "📊");
   } catch (err) {
     console.error("❌ Fetch error:", err);
-    showToast("Error fetching live data ⚠️", "⚠️");
+    showToast("Error loading live data", "⚠️");
   }
 }
+
 
 
 function updateDashboard(rampRows, incomingRows) {
