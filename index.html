@@ -78,12 +78,16 @@ async function fetchJSONData() {
   try {
     showToast("Fetching latest data...", "⏳");
 
-    // 🚀 Use AllOrigins to bypass GitHub CDN cache
-    const fullURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(jsonURL)}&cb=${Date.now()}`;
-    const res = await fetch(fullURL);
+    const jsonURL = "https://raw.githubusercontent.com/reyvincentestayan10-afk/port-dashboard/main/dashboard_data.json";
+    const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(jsonURL)}&cb=${Date.now()}`;
+
+    const res = await fetch(proxyURL, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch JSON file");
 
-    const data = await res.json();
+    // AllOrigins wraps the response in { contents: "..." }
+    const wrapper = await res.json();
+    const data = JSON.parse(wrapper.contents);
+
     console.log("✅ Live JSON loaded:", data);
 
     const rampRows = data.latestRampOccupants || [];
@@ -93,10 +97,11 @@ async function fetchJSONData() {
     showToast("Dashboard updated successfully ✅", "📊");
   } catch (err) {
     console.error("❌ Fetch error:", err);
-    showToast("Error loading live data", "⚠️");
+    showToast("Error fetching live data ⚠️", "⚠️");
   }
 }
 
+ 
 
 function updateDashboard(rampRows, incomingRows) {
   const activeBody = document.getElementById("activeBody");
