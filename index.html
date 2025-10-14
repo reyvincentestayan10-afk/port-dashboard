@@ -1,59 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMO-Matnog — Arrival/Departure</title>
+<title>TMO-Matnog — Arrival/Departure Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#0b1620;--panel:#12202a;--header:#0e1823;--accent:#1f8ef1;--muted:#9fb0bd;--white:#eaf2f8;
-  --loading:#2ad36a;--unloading:#2b9be6;--standby:#f2c94c;--standby-dep:#ff9a43;--anchorage:#6b7280;
-  --toast-bg:rgba(12,18,24,0.95)
+  --bg:#0f2126;
+  --panel:#0d2a2f;
+  --header:#0e1823;
+  --accent:#1790ff;
+  --accent-dark:#0f74d1;
+  --muted:#9aa9ac;
+  --white:#eaf2f8;
+  --loading:#2ad36a;
+  --unloading:#2b9be6;
+  --standby:#f2c94c;
+  --standby-dep:#ff9a43;
+  --anchorage:#6b7380;
+  --radius:10px;
 }
-html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:"Segoe UI",Roboto,Arial,sans-serif}
-header{background:var(--header);padding:14px 18px;border-bottom:3px solid var(--accent);display:flex;align-items:center;justify-content:space-between}
-header h1{margin:0;color:var(--accent);font-size:1.2rem}
-header .controls{display:flex;gap:10px;align-items:center}
-header button{background:var(--accent);border:none;padding:8px 10px;border-radius:6px;color:#021;cursor:pointer}
-main{padding:12px;display:flex;flex-direction:column;gap:12px;height:calc(100% - 74px);box-sizing:border-box}
-.panel{background:var(--panel);border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.5);display:flex;flex-direction:column}
-.title{background:var(--header);padding:10px 14px;color:var(--accent);font-weight:700;text-transform:uppercase}
-.content{padding:8px 10px;overflow:auto}
-table{width:100%;border-collapse:collapse}
-thead th{padding:10px 8px;text-align:center;color:var(--accent);font-weight:700;font-size:.9rem;text-transform:uppercase}
-tbody td{padding:12px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.03);font-size:1rem}
-tbody tr:nth-child(odd){background:rgba(255,255,255,0.01)}
-.ramp-col{width:84px;font-weight:800;color:var(--accent)}
-.status{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:700;color:#071018;min-width:120px;text-align:center;}
+
+/* 👇 Add this block here */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 35vh;
+  background: url('images/matnog_ports.png') no-repeat center top;
+  background-size: cover;
+  opacity: 0.42;
+  mix-blend-mode: luminosity;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* your existing body and other CSS below */
+html,body{
+  height:100%;
+  margin:0;
+  font-family:'Montserrat',system-ui,Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,#07121a 0%,#071a1f 50%),var(--bg);
+  color:var(--white);
+  -webkit-font-smoothing:antialiased;
+}
+
+header{background:var(--header);padding:16px 24px;border-bottom:3px solid var(--accent);display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,0.6);}
+header .brand{display:flex;align-items:center;gap:18px;}
+header .logo{width:70px;height:70px;background:#0b2b33;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;}
+header h1{margin:0;font-size:2rem;color:var(--white);}
+header .timebox{text-align:right;}
+header .timebox .date{font-size:0.9rem;color:var(--muted);}
+header .timebox .time{font-size:2.5rem;font-weight:800;}
+
+main{padding:20px;display:flex;flex-direction:column;gap:20px;}
+.panel{background:var(--panel);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.5);}
+.title{background:var(--accent-dark);padding:12px 16px;font-weight:700;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;color:#fff;}
+.content{padding:12px 16px;overflow:auto;}
+
+table{width:100%;border-collapse:collapse;border-left:1px solid rgba(255,255,255,0.05);}
+thead th{padding:10px 8px;text-align:center;font-weight:700;font-size:0.9rem;background:var(--accent);color:#fff;border-right:1px solid rgba(255,255,255,0.1);}
+tbody td{padding:12px 8px;text-align:center;font-size:1rem;border-bottom:1px solid rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.05);}
+tbody td:last-child,thead th:last-child{border-right:none;}
+tbody tr:nth-child(odd){background:rgba(255,255,255,0.01);}
+
+.logos {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* space between logos */
+}
+
+.logo {
+  height: 48px; /* reduce size here */
+  width: auto;
+}
+
+.status{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:700;min-width:120px;text-align:center;color:#071018;}
 .status.loading{background:var(--loading);animation:flashLoading 1.2s linear infinite;}
-.status.un-loading{background:var(--unloading);}   /* no animation */
+.status.unloading{background:var(--unloading);}
 .status.standby-load{background:var(--standby);}
 .status.standby-depart{background:var(--standby-dep);}
 .status.anchorage{background:var(--anchorage);color:#fff;opacity:.92;}
-@keyframes flashLoading{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes softPulse{0%,100%{box-shadow:0 0 8px rgba(43,155,230,0.12)}50%{box-shadow:0 0 20px rgba(43,155,230,0.26)}}
-#toastWrap{position:fixed;top:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:9999}
-.toast{min-width:260px;background:var(--toast-bg);color:var(--white);padding:10px 14px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.5);display:flex;gap:12px;align-items:center;opacity:0;transform:translateY(-8px);transition:all .32s}
-.toast.show{opacity:1;transform:translateY(0)}
-footer{padding:8px 12px;text-align:center;color:var(--muted);font-size:.9rem;background:var(--header);border-top:2px solid var(--accent)}
+@keyframes flashLoading{0%,100%{opacity:1}50%{opacity:.35;}}
+
+footer{padding:10px;text-align:center;color:var(--muted);font-size:.9rem;background:var(--header);border-top:2px solid var(--accent);}
+
+/* ---------------- RESPONSIVE DESIGN ---------------- */
+
+/* For tablets (width below 1024px) */
+@media (max-width: 1024px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  header .brand h1 {
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  header .logos {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  header .timebox {
+    align-self: flex-end;
+  }
+
+  main {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  table th, table td {
+    font-size: 0.85rem;
+    padding: 6px;
+  }
+
+  .status {
+    min-width: 90px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* For phones (width below 600px) */
+@media (max-width: 600px) {
+  header {
+    padding: 10px 16px;
+  }
+
+  header .logos {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .logo {
+    height: 40px;
+  }
+
+  header .brand h1 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  header .timebox .time {
+    font-size: 1.8rem;
+  }
+
+  .title {
+    font-size: 0.9rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  table th, table td {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+  }
+
+  footer {
+    font-size: 0.8rem;
+  }
+}
+
 </style>
 </head>
 <body>
 
 <header>
-  <h1>TMO-Matnog — Arrival/Departure</h1>
+  <div class="logos">
+    <img src="C:\Users\PPA\port-dashboard\images\bagong_pilipinas.png" class="logo" alt="PPA Logo">
+	<img src="C:\Users\PPA\port-dashboard\images\ppa_logo.png" class="logo" alt="PPA Logo">
+  </div>
+  <div class="brand">
+    <h1>TMO-Matnog — Arrival/Departure</h1>
+  </div>
+  <div class="timebox">
+    <div class="date" id="currentDate">—</div>
+    <div class="time" id="currentTime">—</div>
+  </div>
 </header>
 
 <main>
   <section class="panel">
-    <div class="title">
-      Active Vessels at Berth 
-      <span id="lastUpdated" class="last-updated">—</span>
-    </div>
+    <div class="title">Active Vessels at Berth <span id="lastUpdated" style="font-weight:400;font-size:.9rem;color:#fff;">Last updated: —</span></div>
     <div class="content">
       <table>
-        <thead><tr><th class="ramp-col">Ramp</th><th>Vessel</th><th>Shipping Lines</th><th>Last Port</th><th>Next Port</th><th>ETA</th><th>ETD</th><th>Status</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Ramp Num</th>
+            <th>Vessel</th>
+            <th>Shipping Lines</th>
+            <th>Last Port</th>
+            <th>Next Port</th>
+            <th>ETA</th>
+            <th>ETD</th>
+            <th>Status</th>
+          </tr>
+        </thead>
         <tbody id="activeBody"><tr><td colspan="8" style="opacity:.6">Loading...</td></tr></tbody>
       </table>
     </div>
@@ -63,66 +222,36 @@ footer{padding:8px 12px;text-align:center;color:var(--muted);font-size:.9rem;bac
     <div class="title">Incoming Vessels</div>
     <div class="content">
       <table>
-        <thead><tr><th>Vessel</th><th>Shipping Lines</th><th>Origin</th><th>Destination</th><th>ETA</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Vessel</th>
+            <th>Shipping Lines</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>ETA</th>
+          </tr>
+        </thead>
         <tbody id="incomingBody"><tr><td colspan="5" style="opacity:.6">Loading...</td></tr></tbody>
       </table>
+      <div id="lastCheckedBottom" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Checked: —</div>
     </div>
   </section>
 </main>
 
-<footer>Terminal Management Office of Matnog</footer>
+<footer>Copyright © Terminal Management Office of Matnog 2025</footer>
 
 <script>
-const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
+const oneDriveJSON="https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
-async function fetchJSONData() {
-  try {
-    const fullURL = `${oneDriveJSON}?nocache=${Date.now()}`;
-    const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(fullURL));
-    if (!res.ok) throw new Error("Failed to fetch JSON file");
+function formatTIME(val){if(!val)return"—";const d=val.replace(/\D/g,'');if(d.length<3)return val;let h=d.slice(0,d.length-2).padStart(2,'0');let m=d.slice(-2).padStart(2,'0');return `${h}:${m}`;}
 
-    const data = await res.json();
+function updateDashboard(ramps,incoming){const a=document.getElementById('activeBody');const i=document.getElementById('incomingBody');a.innerHTML='';i.innerHTML='';ramps.forEach(r=>{a.innerHTML+=`<tr><td>${r["Ramp Num"]||"—"}</td><td>${r["Vessel Name"]||"—"}</td><td>${r["Shipping Lines"]||"—"}</td><td>${r["Last Port"]||"—"}</td><td>${r["Next Port"]||"—"}</td><td>${formatTIME(r["ETA"])}</td><td>${formatTIME(r["ETD"])}</td><td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td></tr>`;});incoming.forEach(r=>{i.innerHTML+=`<tr><td>${r["Vessel Name"]||"—"}</td><td>${r["Shipping Lines"]||"—"}</td><td>${r["Last Port"]||"—"}</td><td>${r["Next Port"]||"—"}</td><td>${formatTIME(r["ETA"])}</td></tr>`;});}
 
-    const rampRows = data.latestRampOccupants || [];
-    const incomingRows = data.incomingVessels || [];
+function updateTime(){const d=new Date();const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];document.getElementById('currentDate').textContent=`${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;document.getElementById('currentTime').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;document.getElementById('lastCheckedBottom').textContent=`Last Checked: ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;document.getElementById('lastUpdated').textContent=`Last updated: ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 
-    updateDashboard(rampRows, incomingRows);
+async function fetchJSON(){try{const url=`${oneDriveJSON}?nocache=${Date.now()}`;const res=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);const data=await res.json();updateDashboard(data.latestRampOccupants||[],data.incomingVessels||[]);updateTime();}catch(e){console.error('Fetch error:',e);}}
 
-    document.getElementById("lastUpdated").textContent = "Last checked: " + new Date().toLocaleTimeString();
-  } catch (err) {
-    console.error("Fetch error:", err);
-  }
-}
-
-function updateDashboard(rampRows, incomingRows) {
-  const activeBody = document.getElementById("activeBody");
-  const incomingBody = document.getElementById("incomingBody");
-
-  activeBody.innerHTML = rampRows.map(r => `
-    <tr>
-      <td class="ramp-col">${r["Ramp Num"] || "—"}</td>
-      <td>${r["Vessel Name"] || "—"}</td>
-      <td>${r["Shipping Lines"] || "—"}</td>
-      <td>${r["Last Port"] || "—"}</td>
-      <td>${r["Next Port"] || "—"}</td>
-      <td>${r["ETA"] || "—"}</td>
-      <td>${r["ETD"] || "—"}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g, '-') || ""}">${r["Status"] || "—"}</span></td>
-    </tr>`).join("");
-
-  incomingBody.innerHTML = incomingRows.map(r => `
-    <tr>
-      <td>${r["Vessel Name"] || "—"}</td>
-      <td>${r["Shipping Lines"] || "—"}</td>
-      <td>${r["Last Port"] || "—"}</td>
-      <td>${r["Next Port"] || "—"}</td>
-      <td>${r["ETA"] || "—"}</td>
-    </tr>`).join("");
-}
-
-fetchJSONData();
-setInterval(fetchJSONData, 10000);
+updateTime();fetchJSON();setInterval(fetchJSON,10000);
 </script>
-
 </body>
 </html>
