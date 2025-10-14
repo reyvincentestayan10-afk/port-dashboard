@@ -78,9 +78,9 @@ async function fetchJSONData() {
   try {
     showToast("Fetching latest data...", "⏳");
 
-    // 🔥 Force fresh fetch (bypass browser cache)
-    const fullURL = `${jsonURL}?nocache=${Date.now()}`;
-    const res = await fetch(fullURL, { cache: "no-store" });
+    // 🚀 Use AllOrigins to bypass GitHub CDN cache
+    const fullURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(jsonURL)}&cb=${Date.now()}`;
+    const res = await fetch(fullURL);
     if (!res.ok) throw new Error("Failed to fetch JSON file");
 
     const data = await res.json();
@@ -96,6 +96,7 @@ async function fetchJSONData() {
     showToast("Error loading live data", "⚠️");
   }
 }
+
 
 function updateDashboard(rampRows, incomingRows) {
   const activeBody = document.getElementById("activeBody");
@@ -161,5 +162,5 @@ document.getElementById("refreshBtn").addEventListener("click", fetchJSONData);
 
 // 🚀 Auto-load on start + every 60s
 fetchJSONData();
-setInterval(fetchJSONData, 5000);
+setInterval(fetchJSONData, 10000);
 </script>
