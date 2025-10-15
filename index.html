@@ -21,6 +21,16 @@
   --standby-dep:#ff9a43;
   --anchorage:#6b7380;
   --radius:10px;
+  --
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Montserrat', system-ui, Segoe UI, Roboto, Arial;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(180deg, rgba(7, 18, 26, 0.50) 0%, rgba(7, 26, 31, 0.40) 0%);
 }
 
 /* Background overlay effect for top portion */
@@ -31,28 +41,11 @@ body::before {
   left: 0;
   width: 100%;
   height: 35vh;
-  background: url('images/matnog_ports_2.png') no-repeat center top;
+  background: url('images/matnog_ports_3.png') no-repeat center top;
   background-size: cover;
-  opacity: 0.50;
-  mix-blend-mode: luminosity;
   z-index: -1;
   pointer-events: none;
-}
-
-html, body {
-  height: 100%;
-  margin: 0;
-  body {
-  margin: 0;
-  /background-color: #e6eef3; /* fallback color */
-  background-image: url('images/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  font-family: 'Montserrat', system-ui, Segoe UI, Roboto, Arial;
-  background: linear-gradient(180deg,#07121a 0%,#071a1f 50%), var(--bg);
-  color: var(--white);
-  -webkit-font-smoothing: antialiased;
+  
 }
 
 /* ---------------- HEADER ---------------- */
@@ -103,7 +96,7 @@ header {
 }
 
 .timebox .time {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
 }
 
@@ -173,16 +166,23 @@ tbody tr:nth-child(odd) {
   color: #071018;
 }
 
-.status.loading { background: var(--loading); animation: flashLoading 1.2s linear infinite; }
+/* Force blinking animation to apply correctly */
+.status.loading {
+  background: var(--loading);
+  animation: blinkLoading 1.2s ease-in-out infinite;
+  color: #071018;
+}
+
+@keyframes blinkLoading {
+  0%, 100% { background-color: #2ad36a; }
+  50% { background-color: #1ea04d; }
+}
+
 .status.unloading { background: var(--unloading); }
 .status.standby-load { background: var(--standby); }
 .status.standby-depart { background: var(--standby-dep); }
 .status.anchorage { background: var(--anchorage); color: #fff; opacity: .92; }
-
-@keyframes flashLoading {
-  0%,100% {opacity: 1;}
-  50% {opacity: .35;}
-}
+  
 
 /* ---------------- FOOTER ---------------- */
 footer {
@@ -254,7 +254,7 @@ footer {
     text-align: center;
   }
   .timebox .time {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   table {
     display: block;
@@ -306,7 +306,7 @@ footer {
           </tr>
         </thead>
         <tbody id="activeBody">
-          <tr><td colspan="8" style="opacity:.6">Loading...</td></tr>
+          <tr><td colspan="8">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -326,12 +326,13 @@ footer {
           </tr>
         </thead>
         <tbody id="incomingBody">
-          <tr><td colspan="5" style="opacity:.6">Loading...</td></tr>
+          <tr><td colspan="5" class="loading-text" >Loading...</td></tr>
         </tbody>
       </table>
-      <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Update:</div>
     </div>
   </section>
+
+  <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div>
 </main>
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
