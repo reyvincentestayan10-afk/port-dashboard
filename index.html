@@ -282,7 +282,6 @@ footer {
   <div class="brand">
     <h1>TMO-Matnog — Arrival/Departure</h1>
   </div>
-  
   <div class="timebox">
     <div class="date" id="currentDate">—</div>
     <div class="time" id="currentTime">—</div>
@@ -291,9 +290,7 @@ footer {
 
 <main>
   <section class="panel">
-    <div class="title">
-      Active Vessels at Berth 
-    </div>
+    <div class="title">Vessels at Berth/Anchorage</div>
     <div class="content">
       <table>
         <thead>
@@ -332,9 +329,9 @@ footer {
           <tr><td colspan="5" style="opacity:.6">Loading...</td></tr>
         </tbody>
       </table>
-     </div>
+      <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Update:</div>
+    </div>
   </section>
-  <div id="lastUpdated" style="text-align:right;font-size:.5rem;color:#fff;padding-top:2px;">Last Updated: —</div>
 </main>
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
@@ -342,6 +339,7 @@ footer {
 <script>
 const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
+/* Format time (HHMM -> HH:MM) */
 function formatTIME(val){
   if(!val) return "—";
   const d = val.replace(/\D/g,'');
@@ -351,6 +349,7 @@ function formatTIME(val){
   return `${h}:${m}`;
 }
 
+/* Update tables */
 function updateDashboard(ramps,incoming){
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
@@ -379,32 +378,37 @@ function updateDashboard(ramps,incoming){
   });
 }
 
-function updateTime(){
+/* Real-time clock */
+function updateClock(){
   const d = new Date();
   const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
   document.getElementById('currentDate').textContent = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   document.getElementById('currentTime').textContent = timeStr;
-  document.getElementById('lastCheckedBottom').textContent = `Last Checked: ${timeStr}`;
-  document.getElementById('lastUpdated').textContent = `Last updated: ${timeStr}`;
 }
 
+/* Fetch JSON + update last checked */
 async function fetchJSON(){
   try {
     const url = `${oneDriveJSON}?nocache=${Date.now()}`;
     const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
-    updateTime();
+    
+    const d = new Date();
+    const hr = String(d.getHours()).padStart(2,'0');
+    const min = String(d.getMinutes()).padStart(2,'0');
+    document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`;
   } catch(e) {
     console.error('Fetch error:', e);
   }
 }
 
-updateTime();
+/* Start updates */
+setInterval(updateClock, 1000);
+updateClock();
 fetchJSON();
 setInterval(fetchJSON, 10000);
 </script>
-
 </body>
 </html>

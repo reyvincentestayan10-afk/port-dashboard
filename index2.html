@@ -31,9 +31,9 @@ body::before {
   left: 0;
   width: 100%;
   height: 35vh;
-  background: url('images/matnog_ports.png') no-repeat center top;
+  background: url('images/matnog_ports_2.png') no-repeat center top;
   background-size: cover;
-  opacity: 0.42;
+  opacity: 0.50;
   mix-blend-mode: luminosity;
   z-index: -1;
   pointer-events: none;
@@ -42,6 +42,13 @@ body::before {
 html, body {
   height: 100%;
   margin: 0;
+  body {
+  margin: 0;
+  /background-color: #e6eef3; /* fallback color */
+  background-image: url('images/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   font-family: 'Montserrat', system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg,#07121a 0%,#071a1f 50%), var(--bg);
   color: var(--white);
@@ -50,16 +57,21 @@ html, body {
 
 /* ---------------- HEADER ---------------- */
 header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background-color: #071f2a;
-  color: white;
   position: sticky;
   top: 0;
   z-index: 1000;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  flex-wrap: wrap;
 }
+
+.header-right {
+  text-align: right;
+  font-size: 0.9rem;
+  }
 
 .logos {
   display: flex;
@@ -74,8 +86,10 @@ header {
 
 .brand h1 {
   margin: 0;
-  font-size: 1.7rem;
+  font-size: 2.5rem;
   font-weight: 800;
+  text-align:center;
+  flex: 1;
   color: var(--white);
 }
 
@@ -203,6 +217,27 @@ footer {
   }
 }
 
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header-left {
+    justify-content: center;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+  }
+
+  .header-right {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 600px) {
   header {
     flex-direction: column;
@@ -255,10 +290,7 @@ footer {
 
 <main>
   <section class="panel">
-    <div class="title">
-      Active Vessels at Berth 
-      <span id="lastUpdated" style="font-weight:400;font-size:.9rem;color:#fff;">Last updated: —</span>
-    </div>
+    <div class="title">Vessels at Berth/Anchorage</div>
     <div class="content">
       <table>
         <thead>
@@ -297,7 +329,7 @@ footer {
           <tr><td colspan="5" style="opacity:.6">Loading...</td></tr>
         </tbody>
       </table>
-      <div id="lastCheckedBottom" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Checked: —</div>
+      <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding-top:4px;">Last Update:</div>
     </div>
   </section>
 </main>
@@ -307,6 +339,7 @@ footer {
 <script>
 const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
+/* Format time (HHMM -> HH:MM) */
 function formatTIME(val){
   if(!val) return "—";
   const d = val.replace(/\D/g,'');
@@ -316,6 +349,7 @@ function formatTIME(val){
   return `${h}:${m}`;
 }
 
+/* Update tables */
 function updateDashboard(ramps,incoming){
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
@@ -344,32 +378,37 @@ function updateDashboard(ramps,incoming){
   });
 }
 
-function updateTime(){
+/* Real-time clock */
+function updateClock(){
   const d = new Date();
   const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
   document.getElementById('currentDate').textContent = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   document.getElementById('currentTime').textContent = timeStr;
-  document.getElementById('lastCheckedBottom').textContent = `Last Checked: ${timeStr}`;
-  document.getElementById('lastUpdated').textContent = `Last updated: ${timeStr}`;
 }
 
+/* Fetch JSON + update last checked */
 async function fetchJSON(){
   try {
     const url = `${oneDriveJSON}?nocache=${Date.now()}`;
     const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
-    updateTime();
+    
+    const d = new Date();
+    const hr = String(d.getHours()).padStart(2,'0');
+    const min = String(d.getMinutes()).padStart(2,'0');
+    document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`;
   } catch(e) {
     console.error('Fetch error:', e);
   }
 }
 
-updateTime();
+/* Start updates */
+setInterval(updateClock, 1000);
+updateClock();
 fetchJSON();
 setInterval(fetchJSON, 10000);
 </script>
-
 </body>
 </html>
