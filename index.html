@@ -173,7 +173,7 @@ table th, table td {
   white-space: nowrap;
 }
 
-th:nth-child(1), td:nth-child(1) { width: 100px; }
+th:nth-child(1), td:nth-child(1) { width: 150px; }
 th:nth-child(6), td:nth-child(6) { width: 100px; }
 th:nth-child(7), td:nth-child(7) { width: 170px; }
 
@@ -310,7 +310,7 @@ footer {
   }
   
   footer {
-    font-size: 0.5rem;
+    font-size: 0.7rem;
   }
 }
 </style>
@@ -405,7 +405,7 @@ function updateDashboard(ramps,incoming){
       <td>${r["Ramp Num"]||"—"}</td>
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
       <td>${r["Next Port"]||"—"}</td>
       <td>${formatTIME(r["ETD"])}</td>
       <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>
@@ -416,7 +416,7 @@ function updateDashboard(ramps,incoming){
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Last Port"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
       <td>${formatTIME(r["ETA"])}</td>
     </tr>`;
   });
