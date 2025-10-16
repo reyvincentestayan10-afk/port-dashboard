@@ -63,7 +63,7 @@ header {
 
 .header-right {
   text-align: right;
-  font-size: 0.9rem;
+  font-size: 1rem;
   }
 
 .logos {
@@ -103,9 +103,35 @@ header {
 /* ---------------- MAIN CONTENT ---------------- */
 main {
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 10px 30px 10px 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 10px 0 8px 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, calc(100% - 50px) 100%, 0 100%);
+  z-index: 2;
+   /mix-blend-mode: overlay;
+  overflow: hidden; /* ensures overlay stays inside */
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+
 }
 
 .panel {
@@ -118,7 +144,7 @@ main {
 .title {
   background: var(--accent-dark);
   padding: 12px 16px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -127,14 +153,16 @@ main {
 }
 
 .content {
-  padding: 12px 16px;
+  padding: 14px 16px;
   overflow: auto;
 }
 
 table {
+
+  table-layout: fixed;
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+
 }
 
 table th, table td {
@@ -145,9 +173,14 @@ table th, table td {
   white-space: nowrap;
 }
 
+th:nth-child(1), td:nth-child(1) { width: 150px; }
+th:nth-child(6), td:nth-child(6) { width: 100px; }
+th:nth-child(7), td:nth-child(7) { width: 175px; }
+
+
 thead th {
   background: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.9rem;
   color: #fff;
 }
@@ -160,7 +193,7 @@ tbody tr:nth-child(odd) {
   display: inline-block;
   padding: 8px 12px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 600;
   min-width: 120px;
   text-align: center;
   color: #071018;
@@ -186,12 +219,17 @@ tbody tr:nth-child(odd) {
 
 /* ---------------- FOOTER ---------------- */
 footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   padding: 10px;
   text-align: center;
   color: var(--muted);
-  font-size: .9rem;
+  font-size: 0.9rem;
   background: var(--header);
   border-top: 2px solid var(--accent);
+  z-index: 100; 
 }
 
 /* ---------------- RESPONSIVE ---------------- */
@@ -266,8 +304,13 @@ footer {
     padding: 6px 10px;
     font-size: 0.8rem;
   }
+  
+  .section-title{
+  font-size: 0.8rem;
+  }
+  
   footer {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 }
 </style>
@@ -288,9 +331,10 @@ footer {
   </div>
 </header>
 
-<main>
+<main> 
+  <!-- Title outside panel -->
+  <h2 class="section-title">Vessels at Berth/Anchorage</h2>
   <section class="panel">
-    <div class="title">Vessels at Berth/Anchorage</div>
     <div class="content">
       <table>
         <thead>
@@ -298,22 +342,22 @@ footer {
             <th>Ramp Num</th>
             <th>Vessel</th>
             <th>Shipping Lines</th>
-            <th>Last Port</th>
-            <th>Next Port</th>
-            <th>ETA</th>
+            <th>Origin</th>
+            <th>Destination</th>
             <th>ETD</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody id="activeBody">
-          <tr><td colspan="8">Loading...</td></tr>
+          <tr><td colspan="7">Loading...</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
+  <!-- Title outside panel -->
+  <h2 class="section-title">Incoming Vessels</h2>
   <section class="panel">
-    <div class="title">Incoming Vessels</div>
     <div class="content">
       <table>
         <thead>
@@ -326,7 +370,7 @@ footer {
           </tr>
         </thead>
         <tbody id="incomingBody">
-          <tr><td colspan="5" class="loading-text" >Loading...</td></tr>
+          <tr><td colspan="5" class="loading-text">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -361,9 +405,8 @@ function updateDashboard(ramps,incoming){
       <td>${r["Ramp Num"]||"—"}</td>
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
       <td>${r["Next Port"]||"—"}</td>
-      <td>${formatTIME(r["ETA"])}</td>
       <td>${formatTIME(r["ETD"])}</td>
       <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>
     </tr>`;
@@ -373,7 +416,7 @@ function updateDashboard(ramps,incoming){
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Last Port"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
       <td>${formatTIME(r["ETA"])}</td>
     </tr>`;
   });
