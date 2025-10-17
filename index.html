@@ -125,6 +125,7 @@ main {
   letter-spacing: 0.5px;
   margin: 10px 0 5px 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  border-top-left-radius: 10px;
   clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, calc(100% - 50px) 100%, 0 100%);
   z-index: 2;
   overflow: hidden; /* ensures overlay stays inside */
@@ -161,17 +162,23 @@ main {
 .content {
   padding: 14px 16px;
   overflow: auto;
+
 }
 
 table {
 
   table-layout: fixed;
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;   /* change from collapse */
+  border-spacing: 0;           /* remove gaps between cells */
+  border-radius: 5px;         /* visible rounded corners */
+  overflow: hidden; 
+  border: 1px solid rgba(255, 255, 255, 0.1);   
 
 }
 
 table th, table td {
+  border-right: 2px solid rgba(255, 255, 255, 0.15);
   padding: 10px 8px;
   text-align: center;
   overflow: hidden;
@@ -285,6 +292,8 @@ footer {
   .timebox .time {
     font-size: 1.6rem;
   }
+  
+  
   table th, table td {
     font-size: 0.85rem;
     padding: 6px;
