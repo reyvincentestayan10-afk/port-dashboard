@@ -21,7 +21,7 @@
   --standby-dep:#ff9a43;
   --anchorage:#6b7380;
   --radius:10px;
-  --
+
 }
 
 html, body {
@@ -116,7 +116,7 @@ main {
   padding: 10px 30px 10px 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 10px 0 8px 0;
+  margin: 10px 0 5px 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, calc(100% - 50px) 100%, 0 100%);
   z-index: 2;
@@ -189,6 +189,31 @@ tbody tr:nth-child(odd) {
   background: rgba(255,255,255,0.03);
 }
 
+.table-wrapper {
+  position: relative;
+  width: 100%;         /* let it stretch full width */
+  display: block;      /* ensures the absolute child fits correctly */
+  overflow: visible;
+  margin-bottom: 40px;
+  
+}
+
+.table-header h2 {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.update-note {
+  position: absolute;
+  top: 35px;        
+  right: 10px;
+  font-size: 0.85rem;
+  color: #ccc;
+  font-style: italic;
+  pointer-events: none;
+}
+
 .status {
   display: inline-block;
   padding: 8px 12px;
@@ -211,11 +236,17 @@ tbody tr:nth-child(odd) {
   50% { background-color: #1ea04d; }
 }
 
-.status.unloading { background: var(--unloading); }
-.status.standby-load { background: var(--standby); }
-.status.standby-depart { background: var(--standby-dep); }
 .status.anchorage { background: var(--anchorage); color: #fff; opacity: .92; }
-  
+.status.unloading { background: var(--unloading); color: #071018; opacity: .92;  }
+
+.status[class*="standby"][class*="load"],
+.status[class*="standby"][class*="depart"] {
+ font-weight: 500;
+ background: none !important;
+  color: #d9dee2 !important;
+  opacity: 1 !important;
+
+  }
 
 /* ---------------- FOOTER ---------------- */
 footer {
@@ -253,6 +284,7 @@ footer {
     font-size: 0.85rem;
     padding: 6px;
   }
+  
 }
 
 @media (max-width: 768px) {
@@ -274,6 +306,31 @@ footer {
     text-align: center;
     font-size: 0.8rem;
   }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .status {
+    min-width: 90px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+    
+  .section-title{
+  font-size: 0.9rem;
+  }
+  
+  .update-note {
+    top: auto;
+    bottom: 10px;
+    right: 12px;
+  
+  footer {
+    font-size: 0.8rem;
+  }
+  
 }
 
 @media (max-width: 600px) {
@@ -309,6 +366,11 @@ footer {
   font-size: 0.8rem;
   }
   
+  .update-note {
+    top: auto;         
+    bottom: 8px;       
+    right: 12px;       
+  
   footer {
     font-size: 0.7rem;
   }
@@ -333,7 +395,12 @@ footer {
 
 <main> 
   <!-- Title outside panel -->
+  <div class="table-wrapper">
+  <div class="section-header">
   <h2 class="section-title">Vessels at Berth/Anchorage</h2>
+  <span class="update-note">Updates every 3 mins</span>
+   </div>
+   
   <section class="panel">
     <div class="content">
       <table>
@@ -376,7 +443,7 @@ footer {
     </div>
   </section>
 
-  <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div>
+ <!-- <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div> -->
 </main>
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
@@ -442,7 +509,7 @@ async function fetchJSON(){
     const d = new Date();
     const hr = String(d.getHours()).padStart(2,'0');
     const min = String(d.getMinutes()).padStart(2,'0');
-    document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`;
+    /*document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`; */
   } catch(e) {
     console.error('Fetch error:', e);
   }

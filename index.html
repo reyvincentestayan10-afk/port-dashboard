@@ -141,67 +141,6 @@ main {
 
 }
 
-/* ---------------- Incomming table panel ---------------- */
-
-.incoming-panel {
-  background: var(--panel);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.7);
-  margin-top: 20px;
-}
-
-.incoming-table {
-  table-layout: fixed;
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 5px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.incoming-table th
- padding: 10px 8px;
-  text-align: center;
-  border-right: 3px solid rgba(13, 42, 47, 0.9);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-
-.incoming-table td {
-  padding: 10px 8px;
-  text-align: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.incoming-table thead th {
-  background: var(--accent);
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #fff;
-}
-
-/* Adjust column widths separately */
-.incoming-table th:nth-child(1),
-.incoming-table td:nth-child(1) { width: 180px; }
-
-.incoming-table th:nth-child(2),
-.incoming-table td:nth-child(2) { width: 200px; }
-
-.incoming-table th:nth-child(3),
-.incoming-table td:nth-child(3) { width: 150px; }
-
-.incoming-table th:nth-child(4),
-.incoming-table td:nth-child(4) { width: 150px; }
-
-.incoming-table th:nth-child(5),
-.incoming-table td:nth-child(5) { width: 100px; }
-
-
 /* ---------------- Vessels at Berth/Anchorage ---------------- */
 
 .panel {
@@ -225,6 +164,7 @@ main {
 .content {
   padding: 14px 16px;
   overflow: auto;
+  scrollbar-width: thin; /* for Firefox */
 
 }
 
@@ -260,7 +200,7 @@ table td {
   white-space: nowrap;
 }
 
-th:nth-child(1), td:nth-child(1) { width: 100px; }
+th:nth-child(1), td:nth-child(1) { width: 180px; }
 th:nth-child(6), td:nth-child(6) { width: 100px; }
 th:nth-child(7), td:nth-child(7) { width: 175px; }
 
@@ -379,6 +319,7 @@ footer {
     padding: 6px;
   }
   
+  
 }
 
 @media (max-width: 768px) {
@@ -399,6 +340,7 @@ footer {
   .timebox .time {
     font-size: 1.8rem;
   }
+  
   table {
     display: block;
     overflow-x: auto;
@@ -456,7 +398,6 @@ footer {
   <h2 class="section-title">Vessels at Berth/Anchorage</h2>
   <!--<span class="update-note">Updates every 3 mins</span> -->
    </div>
-   
   <section class="panel">
     <div class="content">
       <table>
@@ -480,10 +421,10 @@ footer {
 
   <!-- Title outside panel -->
   <h2 class="section-title">Incoming Vessels</h2>
-<section class="panel incoming-panel">
+<section class="panel">
   <div class="content">
-    <table class="incoming-table">
-      <thead>
+    <table class="table">
+	<thead>
         <tr>
           <th>Vessel</th>
           <th>Shipping Lines</th>
