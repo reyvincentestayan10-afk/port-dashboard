@@ -116,7 +116,7 @@ main {
   padding: 10px 30px 10px 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 10px 0 8px 0;
+  margin: 10px 0 5px 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, calc(100% - 50px) 100%, 0 100%);
   z-index: 2;
@@ -187,6 +187,30 @@ thead th {
 
 tbody tr:nth-child(odd) {
   background: rgba(255,255,255,0.03);
+}
+
+.table-wrapper {
+  position: relative;
+  width: 100%;         /* let it stretch full width */
+  display: block;      /* ensures the absolute child fits correctly */
+  overflow: visible;
+  
+}
+
+.table-header h2 {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.update-note {
+  position: absolute;
+  top: 35px;          /* move slightly above the table */
+  right: 10px;
+  font-size: 0.85rem;
+  color: #ccc;
+  font-style: italic;
+  pointer-events: none;
 }
 
 .status {
@@ -360,7 +384,9 @@ footer {
 
 <main> 
   <!-- Title outside panel -->
+  <div class="table-wrapper">
   <h2 class="section-title">Vessels at Berth/Anchorage</h2>
+  <span class="update-note">Updates every 3 mins</span>
   <section class="panel">
     <div class="content">
       <table>
@@ -403,7 +429,7 @@ footer {
     </div>
   </section>
 
-  <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div>
+ <!-- <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div> -->
 </main>
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
@@ -469,7 +495,7 @@ async function fetchJSON(){
     const d = new Date();
     const hr = String(d.getHours()).padStart(2,'0');
     const min = String(d.getMinutes()).padStart(2,'0');
-    document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`;
+    /*document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`; */
   } catch(e) {
     console.error('Fetch error:', e);
   }
