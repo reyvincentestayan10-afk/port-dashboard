@@ -141,6 +141,69 @@ main {
 
 }
 
+/* ---------------- Incomming table panel ---------------- */
+
+.incoming-panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.7);
+  margin-top: 20px;
+}
+
+.incoming-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.incoming-table th
+ padding: 10px 8px;
+  text-align: center;
+  border-right: 3px solid rgba(13, 42, 47, 0.9);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+.incoming-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.incoming-table thead th {
+  background: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+/* Adjust column widths separately */
+.incoming-table th:nth-child(1),
+.incoming-table td:nth-child(1) { width: 180px; }
+
+.incoming-table th:nth-child(2),
+.incoming-table td:nth-child(2) { width: 200px; }
+
+.incoming-table th:nth-child(3),
+.incoming-table td:nth-child(3) { width: 150px; }
+
+.incoming-table th:nth-child(4),
+.incoming-table td:nth-child(4) { width: 150px; }
+
+.incoming-table th:nth-child(5),
+.incoming-table td:nth-child(5) { width: 100px; }
+
+
+/* ---------------- Vessels at Berth/Anchorage ---------------- */
+
 .panel {
   background: var(--panel);
   border-radius: var(--radius);
@@ -165,6 +228,7 @@ main {
 
 }
 
+
 table {
 
   table-layout: fixed;
@@ -177,8 +241,8 @@ table {
 
 }
 
-table th, table td {
-  border-right: 2px solid rgba(255, 255, 255, 0.15);
+table th{
+  border-right: 3px solid rgba(13, 42, 47, 0.9);
   padding: 10px 8px;
   text-align: center;
   overflow: hidden;
@@ -186,7 +250,17 @@ table th, table td {
   white-space: nowrap;
 }
 
-th:nth-child(1), td:nth-child(1) { width: 150px; }
+
+table td {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 8px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+th:nth-child(1), td:nth-child(1) { width: 100px; }
 th:nth-child(6), td:nth-child(6) { width: 100px; }
 th:nth-child(7), td:nth-child(7) { width: 175px; }
 
@@ -217,6 +291,9 @@ tbody tr:nth-child(odd) {
   font-weight: 600;
 }
 
+
+/* ---------------- note ---------------- */
+
 .update-note {
   position: absolute;
   top: 35px;        
@@ -225,6 +302,9 @@ tbody tr:nth-child(odd) {
   color: #ccc;
   font-style: italic;
   pointer-events: none; }
+  
+  
+/* ---------------- Status ---------------- */
 
 .status {
   display: inline-block;
@@ -400,27 +480,29 @@ footer {
 
   <!-- Title outside panel -->
   <h2 class="section-title">Incoming Vessels</h2>
-  <section class="panel">
-    <div class="content">
-      <table>
-        <thead>
-          <tr>
-            <th>Vessel</th>
-            <th>Shipping Lines</th>
-            <th>Origin</th>
-            <th>Destination</th>
-            <th>ETA</th>
-          </tr>
-        </thead>
-        <tbody id="incomingBody">
-          <tr><td colspan="5" class="loading-text">Loading...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-  <div class="update-note">Updates every 3 mins</div>
- <!-- <div id="lastChecked" style="text-align:right;font-size:.8rem;color:#fff;padding:6px 4px;">Last Update:</div> -->
+<section class="panel incoming-panel">
+  <div class="content">
+    <table class="incoming-table">
+      <thead>
+        <tr>
+          <th>Vessel</th>
+          <th>Shipping Lines</th>
+          <th>Origin</th>
+          <th>Destination</th>
+          <th>ETA</th>
+        </tr>
+      </thead>
+      <tbody id="incomingBody">
+        <tr><td colspan="5" class="loading-text">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Update note outside the panel -->
+<div class="update-note">Updates every 3 mins</div>
 </main>
+
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
 
