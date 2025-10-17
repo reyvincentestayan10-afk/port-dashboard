@@ -211,11 +211,17 @@ tbody tr:nth-child(odd) {
   50% { background-color: #1ea04d; }
 }
 
-.status.unloading { background: var(--unloading); color: #fff; opacity: .92;  }
-.status.standby-load { background: var(--standby); color: #fff; }
-.status.standby-depart { background: var(--standby-dep); color: #fff; }
 .status.anchorage { background: var(--anchorage); color: #fff; opacity: .92; }
-  
+.status.unloading { background: var(--unloading); color: #071018; opacity: .92;  }
+
+.status[class*="standby"][class*="load"],
+.status[class*="standby"][class*="depart"] {
+ font-weight: 500;
+ background: none !important;
+  color: #d9dee2 !important;
+  opacity: 1 !important;
+
+  }
 
 /* ---------------- FOOTER ---------------- */
 footer {
@@ -253,6 +259,7 @@ footer {
     font-size: 0.85rem;
     padding: 6px;
   }
+  
 }
 
 @media (max-width: 768px) {
@@ -274,6 +281,26 @@ footer {
     text-align: center;
     font-size: 0.8rem;
   }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .status {
+    min-width: 90px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+    
+  .section-title{
+  font-size: 0.9rem;
+  }
+  
+  footer {
+    font-size: 0.8rem;
+  }
+  
 }
 
 @media (max-width: 600px) {
