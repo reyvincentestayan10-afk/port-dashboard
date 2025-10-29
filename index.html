@@ -593,10 +593,10 @@ function showDialog(rowData) {
   const status = (rowData["Status"] || "").toLowerCase();
   let iconPath = "";
 
-  if (status.includes("loading")) {
-    iconPath = "images/icons/loading.svg";
-  } else if (status.includes("unloading")) {
+  if (status.includes("unloading")) {
     iconPath = "images/icons/unloading.svg";
+  } else if (status.includes("loading")) {
+    iconPath = "images/icons/loading.svg";
   } else if (status.includes("standby")) {
     iconPath = "images/icons/standby.svg";
   } else if (status.includes("anchorage")) {
