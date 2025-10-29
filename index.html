@@ -373,6 +373,63 @@ footer {
   }
 }
 
+/* ---------------- Dialog Box ---------------- */
+#dialog {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.dialog-content {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 20px 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  color: var(--white);
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.dialog-content h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: var(--accent);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 6px;
+}
+
+.dialog-content p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+.dialog-close:hover {
+  color: var(--accent);
+}
+
+@keyframes fadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+
 </style>
 </head>
 <body>
@@ -444,6 +501,13 @@ footer {
 <div class="update-note">Updates every 3 mins</div>
 </main>
 
+<div id="dialog">
+  <div class="dialog-content">
+    <span class="dialog-close" onclick="closeDialog()">&times;</span>
+    <h3 id="dialogTitle">Vessel Details</h3>
+    <div id="dialogBody"></div>
+  </div>
+</div>
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
 
@@ -460,31 +524,56 @@ function formatTIME(val){
   return `${h}:${m}`;
 }
 
+/* Create dialog box content */
+function showDialog(rowData) {
+  const dialog = document.getElementById('dialog');
+  const body = document.getElementById('dialogBody');
+  const title = document.getElementById('dialogTitle');
+
+  title.textContent = rowData["Vessel Name"] || "Vessel Details";
+  body.innerHTML = Object.entries(rowData)
+    .map(([key, val]) => `<p><strong>${key}:</strong> ${val || "—"}</p>`)
+    .join('');
+  dialog.style.display = 'flex';
+}
+
+function closeDialog() {
+  document.getElementById('dialog').style.display = 'none';
+}
+
 /* Update tables */
 function updateDashboard(ramps,incoming){
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
   a.innerHTML = '';
   i.innerHTML = '';
+
   ramps.forEach(r=>{
-    a.innerHTML += `<tr>
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>${r["Ramp Num"]||"—"}</td>
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Origin"]||"—"}</td>
       <td>${r["Next Port"]||"—"}</td>
       <td>${formatTIME(r["ETD"])}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>
-    </tr>`;
+      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    a.appendChild(row);
   });
+
   incoming.forEach(r=>{
-    i.innerHTML += `<tr>
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Last Port"]||"—"}</td>
       <td>${r["Origin"]||"—"}</td>
-      <td>${formatTIME(r["ETA"])}</td>
-    </tr>`;
+      <td>${formatTIME(r["ETA"])}</td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    i.appendChild(row);
   });
 }
 
@@ -497,18 +586,13 @@ function updateClock(){
   document.getElementById('currentTime').textContent = timeStr;
 }
 
-/* Fetch JSON + update last checked */
+/* Fetch JSON */
 async function fetchJSON(){
   try {
     const url = `${oneDriveJSON}?nocache=${Date.now()}`;
     const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
-    
-    const d = new Date();
-    const hr = String(d.getHours()).padStart(2,'0');
-    const min = String(d.getMinutes()).padStart(2,'0');
-    /*document.getElementById('lastChecked').textContent = `Last Update: ${hr}:${min}`; */
   } catch(e) {
     console.error('Fetch error:', e);
   }
@@ -519,6 +603,12 @@ setInterval(updateClock, 1000);
 updateClock();
 fetchJSON();
 setInterval(fetchJSON, 10000);
+
+/* Close dialog when clicking outside */
+window.onclick = function(e){
+  const dialog = document.getElementById('dialog');
+  if(e.target === dialog) dialog.style.display = 'none';
+}
 </script>
 </body>
 </html>
