@@ -388,8 +388,9 @@ footer {
   height: auto;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   border-radius: 16px;
   padding: 24px;
   z-index: 1000;
@@ -427,8 +428,8 @@ footer {
 .dialog-content {
   background: var(--panel);
   border-radius: var(--radius);
-  padding: 20px 30px;
-  max-width: 480px;
+  padding: 20px 20px;
+  max-width: 490px;
   width: 90%;
   box-shadow: 0 8px 25px rgba(0,0,0,0.6);
   color: var(--white);
@@ -436,17 +437,6 @@ footer {
   animation: fadeIn 0.3s ease-out;
 }
 
-.dialog-content {
-  background: var(--panel);
-  border-radius: var(--radius);
-  padding: 20px 30px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  color: var(--white);
-  position: relative;
-  animation: fadeIn 0.3s ease-out;
-}
 
 .dialog-content h3 {
   text-align: center;
