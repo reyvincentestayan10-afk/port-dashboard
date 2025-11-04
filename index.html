@@ -375,14 +375,65 @@ footer {
 
 /* ---------------- Dialog Box ---------------- */
 #dialog {
-  display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  width: 380px;
+  max-width: 95%;
+  height: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border-radius: 16px;
+  padding: 24px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#dialog.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+
+#dialogBody {
+  width: 100%;
+  text-align: left;
+  margin-top: 12px;
+}
+
+#dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
   justify-content: center;
-  z-index: 2000;
+  display: none;
+  align-items: center;
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+#dialogOverlay.active {
+  display: flex;
+}
+
+.dialog-content {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 20px 30px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  color: var(--white);
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .dialog-content {
@@ -398,6 +449,7 @@ footer {
 }
 
 .dialog-content h3 {
+  text-align: center;
   margin-top: 10px;
   font-size: 1.3rem;
   color: var(--accent);
@@ -470,6 +522,17 @@ footer {
   font-size: 0.75rem;
   border-radius: 6px;
   display: none;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes floatIcon {
@@ -559,20 +622,24 @@ footer {
 <div class="update-note">Updates every 3 mins</div>
 </main>
 
-<div id="dialog">
-  <div class="dialog-content">
-    <span class="dialog-close" onclick="closeDialog()">&times;</span>
-    <div class="dialog-icon">
-      <div class="svg-wrapper" id="wrapper">
-        <object id="svgObject" class="svg-el" data="images/animated_ship.svg" type="image/svg+xml"></object>
-        <div class="overlay-text" id="overlay">Loading...</div>
-        <div class="error" id="err">SVG failed to load</div>
+<!-- Dialog Overlay and Box -->
+<div id="dialogOverlay">
+  <div id="dialog">
+    <div class="dialog-content">
+      <span class="dialog-close" onclick="closeDialog()">&times;</span>
+      <div class="dialog-icon">
+        <div class="svg-wrapper" id="wrapper">
+          <object id="svgObject" class="svg-el" data="images/animated_ship.svg" type="image/svg+xml"></object>
+          <div class="overlay-text" id="overlay">Loading...</div>
+          <div class="error" id="err">SVG failed to load</div>
+        </div>
       </div>
+      <h3 id="dialogTitle">Vessel Details</h3>
+      <div id="dialogBody"></div>
     </div>
-    <h3 id="dialogTitle">Vessel Details</h3>
-    <div id="dialogBody"></div>
   </div>
 </div>
+
 
 <footer>Copyright © Terminal Management Office of Matnog 2025</footer>
 
@@ -589,17 +656,17 @@ function formatTIME(val){
   return `${h}:${m}`;
 }
 
-/* Create dialog box content */
 function showDialog(rowData) {
+  const overlay = document.getElementById('dialogOverlay');
   const dialog = document.getElementById('dialog');
   const body = document.getElementById('dialogBody');
   const title = document.getElementById('dialogTitle');
   const wrapper = document.getElementById('wrapper');
 
-  // Set title (vessel name)
+  // Reset dialog in case it was previously used
+  body.innerHTML = '';
   title.textContent = rowData["Vessel Name"] || "Vessel Details";
-  
-  
+
   function formatTime(value) {
     if (!value) return "—";
     value = value.toString().trim();
@@ -611,35 +678,33 @@ function showDialog(rowData) {
 
   const ETA = formatTime(rowData["ETA"]);
   const ETD = formatTime(rowData["ETD"]);
-  
 
-  // Build vessel info body using the data from the clicked row
+  let status = rowData["Status"] || "";
+  if (!rowData["Ramp Num"] || rowData["Ramp Num"].toString().trim() === "") {
+    status = "Incoming";
+  }
+
+  const etaLine = status === "Incoming"
+    ? `<p><strong>ETA:</strong> ${ETA || "—"}</p>`
+    : "";
+
   body.innerHTML = `
     <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
-    <p><strong>Status:</strong> ${rowData["Status"] || "—"}</p>
-    <p><strong>ETA:</strong> ${ETA || "—"}</p>
+    <p><strong>Status:</strong> ${status || "—"}</p>
+    ${etaLine}
     <p><strong>ETD:</strong> ${ETD || "—"}</p>
     <p><strong>Origin:</strong> ${rowData["Origin"] || "—"}</p>
     <p><strong>Destination:</strong> ${rowData["Next Port"] || "—"}</p>
   `;
 
-  // Determine which SVG icon to display
-  const status = (rowData["Status"] || "").toLowerCase();
-  let iconPath = "";
+  const iconStatus = status.toLowerCase();
+  let iconPath = "images/icons/default_ship.svg";
 
-  if (status.includes("unloading")) {
-    iconPath = "images/icons/unloading.svg";
-  } else if (status.includes("loading")) {
-    iconPath = "images/icons/loading.svg";
-  } else if (status.includes("standby")) {
-    iconPath = "images/icons/standby.svg";
-  } else if (status.includes("anchorage")) {
-    iconPath = "images/icons/anchorage.svg";
-  } else {
-    iconPath = "images/icons/default_ship.svg";
-  }
+  if (iconStatus.includes("unloading")) iconPath = "images/icons/unloading.svg";
+  else if (iconStatus.includes("loading")) iconPath = "images/icons/loading.svg";
+  else if (iconStatus.includes("standby")) iconPath = "images/icons/standby.svg";
+  else if (iconStatus.includes("anchorage")) iconPath = "images/icons/anchorage.svg";
 
-  // Insert the SVG animation dynamically
   wrapper.innerHTML = `
     <object 
       data="${iconPath}?v=${Date.now()}" 
@@ -649,16 +714,37 @@ function showDialog(rowData) {
     </object>
   `;
 
-  // Show the dialog
-  dialog.style.display = "flex";
-
-  // Watch for SVG loading or fallback
-  initDialogSVGWatcher();
+  // Open the dialog and overlay
+  overlay.classList.add("active");
+  dialog.classList.add("active");
 }
 
 function closeDialog() {
-  document.getElementById('dialog').style.display = 'none';
+  const dialog = document.getElementById('dialog');
+  const overlay = document.getElementById('dialogOverlay');
+  const body = document.getElementById('dialogBody');
+  const wrapper = document.getElementById('wrapper');
+
+  dialog.classList.remove('active');
+  overlay.classList.remove('active');
+
+  // Reset after fade-out
+  setTimeout(() => {
+    body.innerHTML = '';
+    wrapper.innerHTML = '';
+  }, 200);
 }
+
+document.addEventListener('click', function(e) {
+  const dialog = document.getElementById('dialog');
+  const overlay = document.getElementById('dialogOverlay');
+
+  // only close if overlay is visible, click target IS the overlay itself
+  if (overlay.classList.contains('active') && e.target === overlay) {
+    closeDialog();
+  }
+});
+
 
 
 /* Update tables */
@@ -739,12 +825,6 @@ setInterval(updateClock, 1000);
 updateClock();
 fetchJSON();
 setInterval(fetchJSON, 10000);
-
-/* Close dialog when clicking outside */
-window.onclick = function(e){
-  const dialog = document.getElementById('dialog');
-  if(e.target === dialog) dialog.style.display = 'none';
-}
 
 </script>
 </body>
