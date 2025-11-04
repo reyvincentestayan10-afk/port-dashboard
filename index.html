@@ -398,7 +398,7 @@ footer {
 }
 
 .dialog-content h3 {
-  margin-top: 0;
+  margin-top: 10px;
   font-size: 1.3rem;
   color: var(--accent);
   border-bottom: 1px solid rgba(255,255,255,0.2);
@@ -424,40 +424,52 @@ footer {
 }
 
 .dialog-icon {
-  width: 180px;
-  height: 180px;
-  display: block;
-  margin: 0 auto;
-  background: #fff;            /* white background */
-  border-radius: 50%;          /* makes it circular; remove if you prefer square */
-  padding: 10px;               /* spacing inside white background */
-  box-shadow: 0 0 15px rgba(255,255,255,0.2); /* optional glow */
+  width: 80%;
+  max-width: 320px;
+  margin: 0 auto 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.icon-svg {
-  width: 200px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: #fff;
   border-radius: 50%;
-  padding: 10px;
-  overflow: hidden;     /* hides watermark beyond circle */
-  box-shadow: 0 0 15px rgba(255,255,255,0.2);
-  
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255,255,255,0.40);
+  padding: 5px;         
 }
 
-.icon-svg object,
-.icon-svg img {
-  width: 100%;
+.svg-wrapper {
+  position: relative;
+  width: 90%;
   height: 100%;
-  object-fit: cover;     /* scales inside without overflowing */
-  transform: translateY(-10px); /* adjust this to move watermark out of view */
+  background: #fff;
+  clip-path: inset(18% 0 15% 0);
+  overflow: hidden;
+  
+}
+.svg-el { width: 100%; height: 100%; display: block; }
+
+.overlay-text {
+  position: absolute;
+  bottom: 2px;
+  left: 2px; right: 2px;
+  background: rgba(255,255,255,0.95);
+  color: #000;
+  padding: 10px 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.error {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: rgba(255,0,0,0.08);
+  color: #d00;
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  display: none;
 }
 
 @keyframes floatIcon {
@@ -550,13 +562,13 @@ footer {
 <div id="dialog">
   <div class="dialog-content">
     <span class="dialog-close" onclick="closeDialog()">&times;</span>
-
-    <!-- Animated SVG icon at top -->
-    <div id="dialogIcon" class="dialog-icon">
-      <!-- Example placeholder (replace this with your actual SVG or animation) -->
-      <img src="images/animated_ship.svg" alt="Vessel Icon" class="icon-svg">
+    <div class="dialog-icon">
+      <div class="svg-wrapper" id="wrapper">
+        <object id="svgObject" class="svg-el" data="images/animated_ship.svg" type="image/svg+xml"></object>
+        <div class="overlay-text" id="overlay">Loading...</div>
+        <div class="error" id="err">SVG failed to load</div>
+      </div>
     </div>
-
     <h3 id="dialogTitle">Vessel Details</h3>
     <div id="dialogBody"></div>
   </div>
@@ -582,14 +594,36 @@ function showDialog(rowData) {
   const dialog = document.getElementById('dialog');
   const body = document.getElementById('dialogBody');
   const title = document.getElementById('dialogTitle');
-  const iconContainer = document.getElementById('dialogIcon'); // fix: use dialogIcon instead of icon-container
+  const wrapper = document.getElementById('wrapper');
 
+  // Set title (vessel name)
   title.textContent = rowData["Vessel Name"] || "Vessel Details";
-  body.innerHTML = Object.entries(rowData)
-    .map(([key, val]) => `<p><strong>${key}:</strong> ${val || "—"}</p>`)
-    .join('');
+  
+  
+  function formatTime(value) {
+    if (!value) return "—";
+    value = value.toString().trim();
+    if (value.length === 4 && !value.includes(":")) {
+      return value.substring(0, 2) + ":" + value.substring(2);
+    }
+    return value;
+  }
 
-  // Determine status and choose appropriate SVG icon
+  const ETA = formatTime(rowData["ETA"]);
+  const ETD = formatTime(rowData["ETD"]);
+  
+
+  // Build vessel info body using the data from the clicked row
+  body.innerHTML = `
+    <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
+    <p><strong>Status:</strong> ${rowData["Status"] || "—"}</p>
+    <p><strong>ETA:</strong> ${ETA || "—"}</p>
+    <p><strong>ETD:</strong> ${ETD || "—"}</p>
+    <p><strong>Origin:</strong> ${rowData["Origin"] || "—"}</p>
+    <p><strong>Destination:</strong> ${rowData["Next Port"] || "—"}</p>
+  `;
+
+  // Determine which SVG icon to display
   const status = (rowData["Status"] || "").toLowerCase();
   let iconPath = "";
 
@@ -605,22 +639,27 @@ function showDialog(rowData) {
     iconPath = "images/icons/default_ship.svg";
   }
 
-  /// Load animated SVG via <object> (so SVGator scripts execute properly)
-iconContainer.innerHTML = `
-  <object 
-    data="${iconPath}?v=${Date.now()}" 
-    type="image/svg+xml" 
-    class="icon-svg" 
-    style="pointer-events:none; display:block; margin:0 auto;">
-  </object>`;
-dialog.style.display = "flex";
+  // Insert the SVG animation dynamically
+  wrapper.innerHTML = `
+    <object 
+      data="${iconPath}?v=${Date.now()}" 
+      type="image/svg+xml" 
+      class="icon-svg" 
+      style="pointer-events:none; display:block; margin:0 auto;">
+    </object>
+  `;
 
+  // Show the dialog
+  dialog.style.display = "flex";
+
+  // Watch for SVG loading or fallback
+  initDialogSVGWatcher();
 }
-
 
 function closeDialog() {
   document.getElementById('dialog').style.display = 'none';
 }
+
 
 /* Update tables */
 function updateDashboard(ramps,incoming){
@@ -678,6 +717,22 @@ async function fetchJSON(){
     console.error('Fetch error:', e);
   }
 }
+/* SVG watcher */
+function initSVGWatcher(){
+  const o=document.getElementById('svgObject');
+  const e=document.getElementById('err');
+  if(!o)return;
+  let loaded=false;
+  o.addEventListener('load',()=>loaded=true);
+  setTimeout(()=>{
+    try{
+      const doc=o.contentDocument;
+      if(!doc||!doc.rootElement) throw Error();
+    }catch{
+      if(!loaded){ e.style.display='block'; }
+    }
+  },400);
+}
 
 /* Start updates */
 setInterval(updateClock, 1000);
@@ -690,6 +745,9 @@ window.onclick = function(e){
   const dialog = document.getElementById('dialog');
   if(e.target === dialog) dialog.style.display = 'none';
 }
+
 </script>
 </body>
 </html>
+
+
