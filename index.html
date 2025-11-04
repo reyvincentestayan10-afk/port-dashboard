@@ -701,9 +701,9 @@ function showDialog(rowData) {
   let iconPath = "images/icons/default_ship.svg";
 
   if (iconStatus.includes("unloading")) iconPath = "images/icons/unloading.svg";
+  else if (iconStatus.includes("standby for loading")) iconPath = "images/icons/standbyforloading.svg";
   else if (iconStatus.includes("loading")) iconPath = "images/icons/loading.svg";
-  else if (iconStatus.includes("standby")) iconPath = "images/icons/standbyforloading.svg";
-  else if (iconStatus.includes("anchorage")) iconPath = "images/icons/anchorage.svg";
+  else if (iconStatus.includes("anchorage")) iconPath = "images/icons/standbyforloading.svg";
 
   wrapper.innerHTML = `
     <object 
