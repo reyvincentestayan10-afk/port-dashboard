@@ -755,7 +755,7 @@ function updateDashboard(ramps,incoming){
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Origin"]||"—"}</td>
       <td>${r["Next Port"]||"—"}</td>
-      <td>${formatTIME(r["ETD"])}</td>
+      <td>${formatTIME(r["ETD Date and Time"])}</td>
       <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
     row.addEventListener('click', () => showDialog(r));
     row.style.cursor = "pointer";
@@ -769,7 +769,7 @@ function updateDashboard(ramps,incoming){
       <td>${r["Shipping Lines"]||"—"}</td>
       <td>${r["Last Port"]||"—"}</td>
       <td>${r["Origin"]||"—"}</td>
-      <td>${formatTIME(r["ETA"])}</td>`;
+      <td>${formatTIME(r["ETA Date and Time"])}</td>`;
     row.addEventListener('click', () => showDialog(r));
     row.style.cursor = "pointer";
     i.appendChild(row);
