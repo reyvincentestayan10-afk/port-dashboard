@@ -202,8 +202,8 @@ table td {
   white-space: nowrap;
 }
 
-th:nth-child(1), td:nth-child(1) { width: 180px; }
-th:nth-child(6), td:nth-child(6) { width: 100px; }
+/* th:nth-child(1), td:nth-child(1) { width: 180px; } */
+th:nth-child(6), td:nth-child(6) { width: 175px; }
 th:nth-child(7), td:nth-child(7) { width: 175px; }
 
 
@@ -578,7 +578,7 @@ footer {
             <th>Shipping Lines</th>
             <th>Origin</th>
             <th>Destination</th>
-            <th>ETD</th>
+            <th>Estimated Departure</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -600,7 +600,7 @@ footer {
           <th>Shipping Lines</th>
           <th>Origin</th>
           <th>Destination</th>
-          <th>ETA</th>
+          <th>Estimated Arrival</th>
         </tr>
       </thead>
       <tbody id="incomingBody">
@@ -639,13 +639,20 @@ footer {
 const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
 /* Format time (HHMM -> HH:MM) */
-function formatTIME(val){
-  if(!val) return "—";
-  const d = val.replace(/\D/g,'');
-  if(d.length < 3) return val;
-  let h = d.slice(0,d.length-2).padStart(2,'0');
-  let m = d.slice(-2).padStart(2,'0');
-  return `${h}:${m}`;
+function formatTIME(dt){
+  if (!dt) return "—";
+
+  const d = new Date(dt);
+  if (isNaN(d)) return dt; // fallback if invalid
+
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const yyyy = d.getFullYear();
+
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+
+  return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
 }
 
 function showDialog(rowData) {
@@ -668,8 +675,8 @@ function showDialog(rowData) {
     return value;
   }
 
-  const ETA = formatTime(rowData["ETA"]);
-  const ETD = formatTime(rowData["ETD"]);
+  const ETA = formatTIME(rowData["ETA Date and Time"]);
+  const ETD = formatTIME(rowData["ETD Date and Time"]);
 
   let status = rowData["Status"] || "";
   if (!rowData["Ramp Num"] || rowData["Ramp Num"].toString().trim() === "") {
@@ -677,14 +684,14 @@ function showDialog(rowData) {
   }
 
   const etaLine = status === "Incoming"
-    ? `<p><strong>ETA:</strong> ${ETA || "—"}</p>`
+    ? `<p><strong>Estimated Arrival:</strong> ${ETA || "—"}</p>`
     : "";
 
   body.innerHTML = `
     <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
     <p><strong>Status:</strong> ${status || "—"}</p>
     ${etaLine}
-    <p><strong>ETD:</strong> ${ETD || "—"}</p>
+    <p><strong>Estimated Departure:</strong> ${ETD || "—"}</p>
     <p><strong>Origin:</strong> ${rowData["Origin"] || "—"}</p>
     <p><strong>Destination:</strong> ${rowData["Next Port"] || "—"}</p>
   `;
@@ -775,7 +782,6 @@ function updateDashboard(ramps,incoming){
     i.appendChild(row);
   });
 }
-
 /* Real-time clock */
 function updateClock(){
   const d = new Date();
