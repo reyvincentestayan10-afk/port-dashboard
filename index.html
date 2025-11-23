@@ -202,7 +202,7 @@ table td {
   white-space: nowrap;
 }
 
-/* th:nth-child(1), td:nth-child(1) { width: 180px; } */
+ /* th:nth-child(2), td:nth-child(2) { width: 175px; } */
 th:nth-child(6), td:nth-child(6) { width: 175px; }
 th:nth-child(7), td:nth-child(7) { width: 175px; }
 
@@ -692,8 +692,8 @@ function showDialog(rowData) {
     <p><strong>Status:</strong> ${status || "—"}</p>
     ${etaLine}
     <p><strong>Estimated Departure:</strong> ${ETD || "—"}</p>
-    <p><strong>Origin:</strong> ${rowData["Origin"] || "—"}</p>
-    <p><strong>Destination:</strong> ${rowData["Next Port"] || "—"}</p>
+    <p><strong>Origin:</strong> ${rowData["Next Port"] || "—"}</p>
+    <p><strong>Destination:</strong> ${rowData["Origin"] || "—"}</p>
   `;
 
   const iconStatus = status.toLowerCase();
@@ -774,8 +774,8 @@ function updateDashboard(ramps,incoming){
     row.innerHTML = `
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
       <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
       <td>${formatTIME(r["ETA Date and Time"])}</td>`;
     row.addEventListener('click', () => showDialog(r));
     row.style.cursor = "pointer";
