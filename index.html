@@ -662,43 +662,46 @@ function showDialog(rowData) {
   const title = document.getElementById('dialogTitle');
   const wrapper = document.getElementById('wrapper');
 
-  // Reset dialog in case it was previously used
+  // Reset dialog
   body.innerHTML = '';
   title.textContent = rowData["Vessel Name"] || "Vessel Details";
-
-  function formatTime(value) {
-    if (!value) return "—";
-    value = value.toString().trim();
-    if (value.length === 4 && !value.includes(":")) {
-      return value.substring(0, 2) + ":" + value.substring(2);
-    }
-    return value;
-  }
 
   const ETA = formatTIME(rowData["ETA Date and Time"]);
   const ETD = formatTIME(rowData["ETD Date and Time"]);
 
+  // Determine status
   let status = rowData["Status"] || "";
   if (!rowData["Ramp Num"] || rowData["Ramp Num"].toString().trim() === "") {
-    status = "Incoming";
+      status = "Incoming";
   }
 
-  const etaLine = status === "Incoming"
-    ? `<p><strong>Estimated Arrival:</strong> ${ETA || "—"}</p>`
-    : "";
+  // Set origin and destination
+  let origin = rowData["Origin"] || "—";
+  let destination = rowData["Next Port"] || "—";
 
+  if (status === "Incoming") {
+      origin = rowData["Last Port"] || "—";      // swap for incoming
+      destination = rowData["Origin"] || "—";
+  }
+
+  // ETA line
+  const etaLine = status === "Incoming"
+      ? `<p><strong>Estimated Arrival:</strong> ${ETA || "—"}</p>`
+      : "";
+
+  // Build dialog body
   body.innerHTML = `
     <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
     <p><strong>Status:</strong> ${status || "—"}</p>
     ${etaLine}
     <p><strong>Estimated Departure:</strong> ${ETD || "—"}</p>
-    <p><strong>Origin:</strong> ${rowData["Next Port"] || "—"}</p>
-    <p><strong>Destination:</strong> ${rowData["Origin"] || "—"}</p>
+    <p><strong>Origin:</strong> ${origin}</p>
+    <p><strong>Destination:</strong> ${destination}</p>
   `;
 
+  // Determine icon
   const iconStatus = status.toLowerCase();
   let iconPath = "images/icons/incoming.svg";
-
   if (iconStatus.includes("unloading")) iconPath = "images/icons/unloading.svg";
   else if (iconStatus.includes("standby for loading")) iconPath = "images/icons/standbyforloading.svg";
   else if (iconStatus.includes("standby for departure")) iconPath = "images/icons/standbyfordeparture.svg";
@@ -714,7 +717,7 @@ function showDialog(rowData) {
     </object>
   `;
 
-  // Open the dialog and overlay
+  // Show dialog
   overlay.classList.add("active");
   dialog.classList.add("active");
 }
