@@ -703,7 +703,7 @@ function showDialog(rowData) {
   else if (iconStatus.includes("standby for loading")) iconPath = "images/icons/standbyforloading.svg";
   else if (iconStatus.includes("standby for departure")) iconPath = "images/icons/standbyfordeparture.svg";
   else if (iconStatus.includes("loading")) iconPath = "images/icons/loading.svg";
-  else if (iconStatus.includes("anchorage")) iconPath = "images/icons/standbyforloading.svg";
+  else if (iconStatus.includes("anchorage")) iconPath = "images/icons/anchorage.svg";
 
   wrapper.innerHTML = `
     <object 
@@ -774,8 +774,8 @@ function updateDashboard(ramps,incoming){
     row.innerHTML = `
       <td>${r["Vessel Name"]||"—"}</td>
       <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
       <td>${r["Origin"]||"—"}</td>
+      <td>${r["Last Port"]||"—"}</td>
       <td>${formatTIME(r["ETA Date and Time"])}</td>`;
     row.addEventListener('click', () => showDialog(r));
     row.style.cursor = "pointer";
