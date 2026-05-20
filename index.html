@@ -644,7 +644,7 @@ const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/
 
 /* Format time (HHMM -> HH:MM) */
 function formatTIME(dt){
-  if (!dt) return "—";
+  if (!dt) return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
 
   const d = new Date(dt);
   if (isNaN(d)) return dt; // fallback if invalid
@@ -698,7 +698,7 @@ function showDialog(rowData) {
     <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
     <p><strong>Status:</strong> ${status || "—"}</p>
     ${etaLine}
-    <p><strong>Estimated Departure:</strong> ${ETD || "—"}</p>
+    <p><strong>Estimated Departure:</strong> ${ETD || "To be announced"}</p>
     <p><strong>Origin:</strong> ${origin}</p>
     <p><strong>Destination:</strong> ${destination}</p>
   `;
