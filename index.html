@@ -831,7 +831,7 @@ function updateClock(){
 async function fetchJSON(){
   try {
     const url = `${oneDriveJSON}?nocache=${Date.now()}`;
-    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+    const res = await fetch(url);
     const data = await res.json();
     updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
   } catch(e) {
