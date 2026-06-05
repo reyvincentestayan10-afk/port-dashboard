@@ -661,15 +661,8 @@ let lastETag = null;
 // ==================== FORMAT TIME & DELAY ====================
 function formatTIME(dt){
   if (!dt) return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
-<<<<<<< Updated upstream
   const d = new Date(dt);
   if (isNaN(d)) return "To be announced";
-=======
-
-  const d = new Date(dt);
-  if (isNaN(d)) return "To be announced";
-
->>>>>>> Stashed changes
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   const yyyy = d.getFullYear();
@@ -678,10 +671,6 @@ function formatTIME(dt){
   return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
 }
 
-<<<<<<< Updated upstream
-=======
-/* Check if vessel is delayed */
->>>>>>> Stashed changes
 function isDelayed(etdStr) {
     if (!etdStr) return false;
     const etdDate = new Date(etdStr);
@@ -689,10 +678,7 @@ function isDelayed(etdStr) {
     return new Date() > etdDate;
 }
 
-<<<<<<< Updated upstream
 // ==================== DIALOG ====================
-=======
->>>>>>> Stashed changes
 function showDialog(rowData) {
   const overlay = document.getElementById('dialogOverlay');
   const dialog = document.getElementById('dialog');
@@ -705,22 +691,12 @@ function showDialog(rowData) {
 
   const ETA = formatTIME(rowData["ETA Date and Time"]);
   let ETDFormatted = formatTIME(rowData["ETD Date and Time"]);
-<<<<<<< Updated upstream
   const isLate = isDelayed(rowData["ETD Date and Time"]);
 
   let etdHTML = ETDFormatted;
-  if (isLate) etdHTML += ' <span class="delayed-text">* Delayed</span>';
-=======
-  
-  const isLate = isDelayed(rowData["ETD Date and Time"]);
-  
-  let etdHTML = ETDFormatted;
   if (isLate) {
       etdHTML += ' <span class="delayed-text">* Delayed</span>';
-  } else if (!rowData["ETD Date and Time"]) {
-      etdHTML = `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
   }
->>>>>>> Stashed changes
 
   let status = rowData["Status"] || "";
   if (!rowData["Ramp Num"] || String(rowData["Ramp Num"]).trim() === "") {
@@ -808,7 +784,7 @@ function hideSuspensionAnnouncement() {
   document.querySelectorAll('.section-title').forEach(t => t.style.display = 'block');
 }
 
-// ==================== SMOOTH UPDATE DASHBOARD (No Flicker) ====================
+// ==================== UPDATE DASHBOARD (Simple & Stable) ====================
 function updateDashboard(ramps, incoming, suspension, message){
   if (suspension === "yes" || suspension === true || suspension === "true") {
     showSuspensionAnnouncement(message);
@@ -818,40 +794,38 @@ function updateDashboard(ramps, incoming, suspension, message){
 
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
-    
-    a.innerHTML = '';
-    i.innerHTML = '';
 
-<<<<<<< Updated upstream
-    ramps.forEach(r => {
-        const isLate = isDelayed(r["ETD"]);
-        const tr = document.createElement('tr');
-        
-        tr.innerHTML = `
-            <td>${r["Ramp Num"] || "—"}</td>
-            <td>${r["Vessel Name"] || "—"}</td>
-            <td>${r["Shipping Lines"] || "—"}</td>
-            <td>${r["Origin"] || "—"}</td>
-            <td>${r["Next Port"] || "—"}</td>
-            <td class="${isLate ? 'delayed' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
-            <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"] || "—"}</span></td>`;
-        
-        tr.onclick = () => showDialog(r);
-        a.appendChild(tr);
-    });
->>>>>>> Stashed changes
+  a.innerHTML = '';
+  i.innerHTML = '';
 
-    incoming.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${r["Vessel Name"] || "—"}</td>
-            <td>${r["Shipping Lines"] || "—"}</td>
-            <td>${r["Last Port"] || "—"}</td>
-            <td>${r["Origin"] || "—"}</td>
-            <td>${formatTIME(r["ETA Date and Time"])}</td>`;
-        tr.onclick = () => showDialog(r);
-        i.appendChild(tr);
-    });
+  ramps.forEach(r => {
+    const isLate = isDelayed(r["ETD Date and Time"]);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${r["Ramp Num"]||"—"}</td>
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
+      <td>${r["Next Port"]||"—"}</td>
+      <td class="${isLate ? 'delayed-etd' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
+      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    a.appendChild(row);
+  });
+
+  incoming.forEach(r => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
+      <td>${formatTIME(r["ETA Date and Time"])}</td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    i.appendChild(row);
+  });
 }
 
 // ==================== SVG WATCHER ====================
@@ -914,14 +888,11 @@ setInterval(updateClock, 1000);
 updateClock();
 fetchJSON();
 setInterval(fetchJSON, 18000);
-<<<<<<< Updated upstream
 initSVGWatcher();
 
 window.onclick = e => {
   if (e.target.id === 'dialogOverlay') closeDialog();
 };
-=======
->>>>>>> Stashed changes
 
 </script>
 </body>
