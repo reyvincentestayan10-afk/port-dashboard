@@ -820,51 +820,48 @@ function updateDashboard(ramps, incoming, suspension, message){
   a.innerHTML = '';
   i.innerHTML = '';
 
-  ramps.forEach(r => {
-    const isLate = isDelayed(r["ETD Date and Time"]);
-    const row = document.createElement('tr');
-    const etdDisplay = formatTIME(r["ETD Date and Time"]);
-    
-    row.innerHTML = `
-      <td>${r["Ramp Num"]||"—"}</td>
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
-      <td class="${isLate ? 'delayed-etd' : ''}">${etdDisplay}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
-    
-    row.addEventListener('click', () => showDialog(r));
-    row.style.cursor = "pointer";
-    a.appendChild(row);
-  });
+  activeBody.style.opacity = '0';
+  setTimeout(() => {
+    activeBody.innerHTML = '';
+    ramps.forEach(r => {
+      const isLate = isDelayed(r["ETD Date and Time"]);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r["Ramp Num"]||"—"}</td>
+        <td>${r["Vessel Name"]||"—"}</td>
+        <td>${r["Shipping Lines"]||"—"}</td>
+        <td>${r["Origin"]||"—"}</td>
+        <td>${r["Next Port"]||"—"}</td>
+        <td class="${isLate ? 'delayed-etd' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
+        <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
+      row.addEventListener('click', () => showDialog(r));
+      row.style.cursor = "pointer";
+      activeBody.appendChild(row);
+    });
+    activeBody.style.transition = 'opacity 0.3s';
+    activeBody.style.opacity = '1';
+  }, 150);
 
-  incoming.forEach(r => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${formatTIME(r["ETA Date and Time"])}</td>`;
-    row.addEventListener('click', () => showDialog(r));
-    row.style.cursor = "pointer";
-    i.appendChild(row);
-  });
-
+  incomingBody.style.opacity = '0';
+  setTimeout(() => {
+    incomingBody.innerHTML = '';
+    incoming.forEach(r => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r["Vessel Name"]||"—"}</td>
+        <td>${r["Shipping Lines"]||"—"}</td>
+        <td>${r["Last Port"]||"—"}</td>
+        <td>${r["Origin"]||"—"}</td>
+        <td>${formatTIME(r["ETA Date and Time"])}</td>`;
+      row.addEventListener('click', () => showDialog(r));
+      row.style.cursor = "pointer";
+      incomingBody.appendChild(row);
+    });
+    incomingBody.style.transition = 'opacity 0.3s';
+    incomingBody.style.opacity = '1';
+  }, 150);
 }
 
-// ==================== LAST UPDATED ====================
-function updateLastUpdatedTime() {
-  let note = document.getElementById('last-updated');
-  if (!note) {
-    note = document.createElement('div');
-    note.id = 'last-updated';
-    note.style.cssText = 'text-align: right; font-size: 0.85rem; color: #2ad36a; margin-top: 12px;';
-    document.querySelector('main').appendChild(note);
-  }
-  note.textContent = `Last updated: ${new Date().toLocaleTimeString('en-US', {hour12: false})}`;
-}
 
 // ==================== FETCH WITH ETAG (Better Performance) ====================
 async function fetchJSON() {
