@@ -230,6 +230,18 @@ footer {
   .status{min-width:90px;padding:6px 10px;font-size:0.75rem;}
   footer{font-size:0.7rem;}
 }
+
+/* Delayed styling */
+td.delayed {
+    color: #ff4444 !important;
+    font-weight: 700;
+}
+
+.delayed-text {
+    color: #ff4444;
+    font-weight: 600;
+    margin-left: 8px;
+}
 </style>
 </head>
 
@@ -296,102 +308,178 @@ footer {
 const dataURL = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 
 /* Format time (HHMM -> HH:MM) */
-function formatTIME(v){ if(!v) return "—"; const d=v.replace(/\D/g,""); if(d.length<3)return v; return `${d.slice(0,-2).padStart(2,'0')}:${d.slice(-2)}`; }
+function formatTIME(v){ 
+    if(!v) return "—"; 
+    const d=v.replace(/\D/g,""); 
+    if(d.length<4) return v; 
+    return `${d.slice(0,-2).padStart(2,'0')}:${d.slice(-2)}`; 
+}
+
+/* Check if vessel is delayed */
+function isDelayed(etd) {
+    if (!etd) return false;
+    
+    const now = new Date();
+    const etdStr = etd.toString().replace(/\D/g,"");
+    
+    if (etdStr.length < 4) return false;
+    
+    const etdHour = parseInt(etdStr.substring(0, 2));
+    const etdMin = parseInt(etdStr.substring(2, 4));
+    
+    const etdDate = new Date(
+        now.getFullYear(), 
+        now.getMonth(), 
+        now.getDate(), 
+        etdHour, 
+        etdMin
+    );
+    
+    return now > etdDate;
+}
 
 /* Display vessel details */
 function showDialog(r){
-  const dialog=document.getElementById('dialog');
-  const body=document.getElementById('dialogBody');
-  const title=document.getElementById('dialogTitle');
-  const wrapper=document.getElementById('wrapper');
-  title.textContent=r["Vessel Name"]||"Vessel Details";
-  body.innerHTML=Object.entries(r).map(([k,v])=>`<p><strong>${k}:</strong> ${v||"—"}</p>`).join('');
+    const dialog = document.getElementById('dialog');
+    const body = document.getElementById('dialogBody');
+    const title = document.getElementById('dialogTitle');
+    
+    title.textContent = r["Vessel Name"] || "Vessel Details";
 
-  const s=(r["Status"]||"").toLowerCase();
-  let icon="default_ship.svg";
-  if(s.includes("unloading")) icon="unloading.svg";
-  else if(s.includes("loading")) icon="loading.svg";
-  else if(s.includes("standby")) icon="standby.svg";
-  else if(s.includes("anchorage")) icon="anchorage.svg";
+    let html = '';
+    for (const [k, v] of Object.entries(r)) {
+        if (k === "ETD" && v) {
+            const time = formatTIME(v);
+            const delayed = isDelayed(v) ? ' <span class="delayed-text">- Delayed</span>' : '';
+            html += `<p><strong>Estimated Departure:</strong> ${time}${delayed}</p>`;
+        } else {
+            html += `<p><strong>${k}:</strong> ${v || "—"}</p>`;
+        }
+    }
+    
+    body.innerHTML = html;
 
-  wrapper.innerHTML=`
-    <object id="svgObject" class="svg-el" data="images/icons/${icon}?v=${Date.now()}" type="image/svg+xml"></object>
-    <div class="overlay-text" id="overlay">Loading...</div>
-    <div class="error" id="err">SVG failed to load</div>`;
-  dialog.style.display="flex";
-  initSVGWatcher();
+    // Icon logic
+    const s = (r["Status"] || "").toLowerCase();
+    let icon = "default_ship.svg";
+    if(s.includes("unloading")) icon = "unloading.svg";
+    else if(s.includes("loading")) icon = "loading.svg";
+    else if(s.includes("standby")) icon = "standby.svg";
+    else if(s.includes("anchorage")) icon = "anchorage.svg";
+
+    document.getElementById('wrapper').innerHTML = `
+        <object id="svgObject" class="svg-el" data="images/icons/${icon}?v=${Date.now()}" type="image/svg+xml"></object>
+        <div class="overlay-text" id="overlay">Loading...</div>
+        <div class="error" id="err">SVG failed to load</div>`;
+
+    dialog.style.display = "flex";
+    initSVGWatcher();
 }
 
-function closeDialog(){ document.getElementById('dialog').style.display='none'; }
+function closeDialog(){ 
+    document.getElementById('dialog').style.display = 'none'; 
+}
 
 /* Table updates */
-function updateDashboard(ramps,incoming){
-  const a=document.getElementById('activeBody'); const i=document.getElementById('incomingBody');
-  a.innerHTML=''; i.innerHTML='';
-  ramps.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${r["Ramp Num"]||"—"}</td>
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
-      <td>${formatTIME(r["ETD"])}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
-    tr.onclick=()=>showDialog(r);
-    a.appendChild(tr);
-  });
-  incoming.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${formatTIME(r["ETA"])}</td>`;
-    tr.onclick=()=>showDialog(r);
-    i.appendChild(tr);
-  });
+function updateDashboard(ramps, incoming){
+    const a = document.getElementById('activeBody');
+    const i = document.getElementById('incomingBody');
+    
+    a.innerHTML = '';
+    i.innerHTML = '';
+
+    ramps.forEach(r => {
+        const isLate = isDelayed(r["ETD"]);
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td>${r["Ramp Num"] || "—"}</td>
+            <td>${r["Vessel Name"] || "—"}</td>
+            <td>${r["Shipping Lines"] || "—"}</td>
+            <td>${r["Origin"] || "—"}</td>
+            <td>${r["Next Port"] || "—"}</td>
+            <td class="${isLate ? 'delayed' : ''}">${formatTIME(r["ETD"])}</td>
+            <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"] || "—"}</span></td>`;
+        
+        tr.onclick = () => showDialog(r);
+        a.appendChild(tr);
+    });
+
+    incoming.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${r["Vessel Name"] || "—"}</td>
+            <td>${r["Shipping Lines"] || "—"}</td>
+            <td>${r["Last Port"] || "—"}</td>
+            <td>${r["Origin"] || "—"}</td>
+            <td>${formatTIME(r["ETA"])}</td>`;
+        tr.onclick = () => showDialog(r);
+        i.appendChild(tr);
+    });
 }
 
 /* Clock */
 function updateClock(){
-  const d=new Date();
-  const m=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-  document.getElementById('currentDate').textContent=`${m[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-  document.getElementById('currentTime').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    const d = new Date();
+    const m = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    document.getElementById('currentDate').textContent = `${m[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    document.getElementById('currentTime').textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
 }
 
-/* Fetch */
-async function fetchJSON(){
-  try{
-    const res=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(dataURL)}&nocache=${Date.now()}`);
-    const d=await res.json();
-    updateDashboard(d.latestRampOccupants||[],d.incomingVessels||[]);
-  }catch(e){console.error("Fetch error:",e);}
+/* Fetch & other functions remain the same */
+let lastETag = null;
+
+async function fetchJSON() {
+    const loadingIndicator = "Updating...";
+    document.getElementById('activeBody').innerHTML = `<tr><td colspan="7">${loadingIndicator}</td></tr>`;
+    document.getElementById('incomingBody').innerHTML = `<tr><td colspan="5">${loadingIndicator}</td></tr>`;
+
+    const apiUrl = "https://api.github.com/repos/reyvincentestayan10-afk/matnog-dashboard/contents/dashboard_data.json";
+    
+    try {
+        const headers = {
+            "Accept": "application/vnd.github.v3.raw",
+            "Cache-Control": "no-cache"
+        };
+        if (lastETag) headers["If-None-Match"] = lastETag;
+
+        const res = await fetch(apiUrl, { headers });
+        if (res.status === 304) return;
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const data = await res.json();
+        lastETag = res.headers.get('ETag');
+
+        updateDashboard(data.latestRampOccupants || [], data.incomingVessels || []);
+    } catch (e) {
+        console.error("Fetch failed:", e);
+    }
 }
 
 /* SVG watcher */
 function initSVGWatcher(){
-  const o=document.getElementById('svgObject');
-  const e=document.getElementById('err');
-  if(!o)return;
-  let loaded=false;
-  o.addEventListener('load',()=>loaded=true);
-  setTimeout(()=>{
-    try{
-      const doc=o.contentDocument;
-      if(!doc||!doc.rootElement) throw Error();
-    }catch{
-      if(!loaded){ e.style.display='block'; }
-    }
-  },400);
+    const o = document.getElementById('svgObject');
+    const e = document.getElementById('err');
+    if(!o) return;
+    let loaded = false;
+    o.addEventListener('load', () => loaded = true);
+    setTimeout(() => {
+        try {
+            const doc = o.contentDocument;
+            if (!doc || !doc.rootElement) throw Error();
+        } catch {
+            if (!loaded) e.style.display = 'block';
+        }
+    }, 400);
 }
 
 /* Start */
-setInterval(updateClock,1000); updateClock();
-fetchJSON(); setInterval(fetchJSON,10000);
-window.onclick=e=>{if(e.target.id==='dialog')closeDialog();}
+setInterval(updateClock, 1000); 
+updateClock();
+fetchJSON(); 
+setInterval(fetchJSON, 18000);
+
+window.onclick = e => { if(e.target.id === 'dialog') closeDialog(); };
 </script>
 </body>
 </html>
