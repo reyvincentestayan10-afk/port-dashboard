@@ -824,7 +824,7 @@ function updateDashboard(ramps, incoming, suspension, message){
 
 <<<<<<< Updated upstream
     ramps.forEach(r => {
-        const isLate = isDelayed(r["ETD"]);
+        const isLate = isDelayed(r["ETD Date and Time"]);
         const tr = document.createElement('tr');
         
         tr.innerHTML = `
@@ -833,32 +833,12 @@ function updateDashboard(ramps, incoming, suspension, message){
             <td>${r["Shipping Lines"] || "—"}</td>
             <td>${r["Origin"] || "—"}</td>
             <td>${r["Next Port"] || "—"}</td>
-            <td class="${isLate ? 'delayed' : ''}">${formatTIME(r["ETD"])}</td>
+            <td class="${isLate ? 'delayed' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
             <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"] || "—"}</span></td>`;
         
         tr.onclick = () => showDialog(r);
         a.appendChild(tr);
     });
-=======
-  ramps.forEach(r=>{
-	const isLate = isDelayed(r["ETD Date and Time"]);
-    const row = document.createElement('tr');
-	
-	let etdDisplay = formatTIME(r["ETD Date and Time"]);
-	
-    row.innerHTML = `
-      <td>${r["Ramp Num"]||"—"}</td>
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
-      <td class="${isLate ? 'delayed-etd' : ''}">${etdDisplay}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
-    
-    row.addEventListener('click', () => showDialog(r));
-    row.style.cursor = "pointer";
-    a.appendChild(row);
-  });
 >>>>>>> Stashed changes
 
     incoming.forEach(r => {
@@ -868,7 +848,7 @@ function updateDashboard(ramps, incoming, suspension, message){
             <td>${r["Shipping Lines"] || "—"}</td>
             <td>${r["Last Port"] || "—"}</td>
             <td>${r["Origin"] || "—"}</td>
-            <td>${formatTIME(r["ETA"])}</td>`;
+            <td>${formatTIME(r["ETA Date and Time"])}</td>`;
         tr.onclick = () => showDialog(r);
         i.appendChild(tr);
     });
