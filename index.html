@@ -847,9 +847,6 @@ function initSVGWatcher(){
 
 // ==================== FETCH ====================
 async function fetchJSON() {
-  const loadingText = "Updating...";
-  document.getElementById('activeBody').innerHTML = `<tr><td colspan="7">${loadingText}</td></tr>`;
-  document.getElementById('incomingBody').innerHTML = `<tr><td colspan="5">${loadingText}</td></tr>`;
 
   const apiUrl = "https://api.github.com/repos/reyvincentestayan10-afk/matnog-dashboard/contents/dashboard_data.json";
 
