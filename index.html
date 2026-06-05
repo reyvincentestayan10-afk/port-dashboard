@@ -554,6 +554,10 @@ td.delayed-etd {
     margin-left: 8px;
 }
 
+#content {
+  transition: opacity 0.3s ease-in-out;
+}
+
 </style>
 </head>
 <body>
@@ -775,7 +779,7 @@ function hideSuspensionAnnouncement() {
   document.querySelectorAll('.section-title').forEach(t => t.style.display = 'block');
 }
 
-// ==================== UPDATE DASHBOARD ====================
+// ==================== SMOOTH UPDATE DASHBOARD (No Flicker) ====================
 function updateDashboard(ramps, incoming, suspension, message){
   if (suspension === "yes" || suspension === true || suspension === "true") {
     showSuspensionAnnouncement(message);
@@ -783,40 +787,57 @@ function updateDashboard(ramps, incoming, suspension, message){
   }
   hideSuspensionAnnouncement();
 
-  const a = document.getElementById('activeBody');
-  const i = document.getElementById('incomingBody');
+  const activeBody = document.getElementById('activeBody');
+  const incomingBody = document.getElementById('incomingBody');
 
-  a.innerHTML = '';
-  i.innerHTML = '';
+  // === Update Active Vessels (Vessels at Berth) ===
+  activeBody.style.transition = 'opacity 0.25s';
+  activeBody.style.opacity = '0';
 
-  ramps.forEach(r => {
-    const isLate = isDelayed(r["ETD Date and Time"]);
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${r["Ramp Num"]||"—"}</td>
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${r["Next Port"]||"—"}</td>
-      <td class="${isLate ? 'delayed-etd' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
-      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
-    row.addEventListener('click', () => showDialog(r));
-    row.style.cursor = "pointer";
-    a.appendChild(row);
-  });
+  setTimeout(() => {
+    activeBody.innerHTML = '';
 
-  incoming.forEach(r => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${r["Vessel Name"]||"—"}</td>
-      <td>${r["Shipping Lines"]||"—"}</td>
-      <td>${r["Last Port"]||"—"}</td>
-      <td>${r["Origin"]||"—"}</td>
-      <td>${formatTIME(r["ETA Date and Time"])}</td>`;
-    row.addEventListener('click', () => showDialog(r));
-    row.style.cursor = "pointer";
-    i.appendChild(row);
-  });
+    ramps.forEach(r => {
+      const isLate = isDelayed(r["ETD Date and Time"]);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r["Ramp Num"]||"—"}</td>
+        <td>${r["Vessel Name"]||"—"}</td>
+        <td>${r["Shipping Lines"]||"—"}</td>
+        <td>${r["Origin"]||"—"}</td>
+        <td>${r["Next Port"]||"—"}</td>
+        <td class="${isLate ? 'delayed-etd' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
+        <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
+      row.addEventListener('click', () => showDialog(r));
+      row.style.cursor = "pointer";
+      activeBody.appendChild(row);
+    });
+
+    activeBody.style.opacity = '1';
+  }, 180);
+
+  // === Update Incoming Vessels ===
+  incomingBody.style.transition = 'opacity 0.25s';
+  incomingBody.style.opacity = '0';
+
+  setTimeout(() => {
+    incomingBody.innerHTML = '';
+
+    incoming.forEach(r => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r["Vessel Name"]||"—"}</td>
+        <td>${r["Shipping Lines"]||"—"}</td>
+        <td>${r["Last Port"]||"—"}</td>
+        <td>${r["Origin"]||"—"}</td>
+        <td>${formatTIME(r["ETA Date and Time"])}</td>`;
+      row.addEventListener('click', () => showDialog(r));
+      row.style.cursor = "pointer";
+      incomingBody.appendChild(row);
+    });
+
+    incomingBody.style.opacity = '1';
+  }, 180);
 }
 
 // ==================== SVG WATCHER ====================
