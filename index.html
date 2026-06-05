@@ -573,11 +573,9 @@ td.delayed-etd {
 </header>
 
 <main> 
-  <!-- Title outside panel -->
   <div class="table-wrapper">
   <div class="section-header">
   <h2 class="section-title">Vessels at Berth/Anchorage</h2>
-  <!--<span class="update-note">Updates every 3 mins</span> -->
    </div>
   <section class="panel">
     <div class="content">
@@ -600,26 +598,29 @@ td.delayed-etd {
     </div>
   </section>
 
-  <!-- Title outside panel -->
-  <h2 class="section-title">Incoming Vessels</h2>
-<section class="panel">
-  <div class="content">
-    <table class="table">
-	<thead>
-        <tr>
-          <th>Vessel</th>
-          <th>Shipping Lines</th>
-          <th>Origin</th>
-          <th>Destination</th>
-          <th>Estimated Arrival</th>
-        </tr>
-      </thead>
-      <tbody id="incomingBody">
-        <tr><td colspan="5" class="loading-text">Loading...</td></tr>
-      </tbody>
-    </table>
+<div class="table-wrapper">
+  <div class="section-header">
+    <h2 class="section-title">Incoming Vessels</h2>
   </div>
-</section>
+  <section class="panel">
+    <div class="content">
+      <table>
+        <thead>
+          <tr>
+            <th>Vessel</th>
+            <th>Shipping Lines</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Estimated Arrival</th>
+          </tr>
+        </thead>
+        <tbody id="incomingBody">
+          <tr><td colspan="5" class="loading-text">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
 <!-- Update note outside the panel -->
 <div class="update-note">Updates every 3 mins</div>
