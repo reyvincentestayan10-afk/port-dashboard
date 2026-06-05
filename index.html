@@ -777,10 +777,55 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function showSuspensionAnnouncement(message) {
+  document.querySelectorAll('section.panel').forEach(panel => {
+    panel.style.display = 'none';
+  });
 
+  let ann = document.getElementById('suspensionAnnouncement');
+  if (!ann) {
+    ann = document.createElement('div');
+    ann.id = 'suspensionAnnouncement';
+    ann.style.cssText = `
+      background: rgba(220, 50, 50, 0.95);
+      color: white;
+      padding: 50px 30px;
+      margin: 30px 0;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      border: 4px solid #ff4444;
+      line-height: 1.4;
+    `;
+    document.querySelector('main').prepend(ann);
+  }
+  ann.innerHTML = `
+    <strong>⚠️ SERVICE SUSPENSION ANNOUNCEMENT</strong><br><br>
+    ${message || "All trips are cancelled due to Typhoon."}
+  `;
+  ann.style.display = 'block';
+}
+
+function hideSuspensionAnnouncement() {
+  const ann = document.getElementById('suspensionAnnouncement');
+  if (ann) ann.style.display = 'none';
+
+  document.querySelectorAll('section.panel').forEach(panel => {
+    panel.style.display = 'block';
+  });
+}
 
 /* Update tables */
-function updateDashboard(ramps,incoming){
+function updateDashboard(ramps, incoming, suspension, message){
+  if (suspension === "yes" || suspension === true || suspension === "true") {
+    showSuspensionAnnouncement(message);
+    return;
+  }
+
+  hideSuspensionAnnouncement();
+  
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
   a.innerHTML = '';
