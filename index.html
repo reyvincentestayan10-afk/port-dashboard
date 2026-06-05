@@ -650,7 +650,7 @@ td.delayed-etd {
 const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
 let lastETag = null;
 
-// ==================== FORMAT TIME ====================
+// ==================== FORMAT TIME & DELAY ====================
 function formatTIME(dt){
   if (!dt) return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
   const d = new Date(dt);
@@ -663,7 +663,6 @@ function formatTIME(dt){
   return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
 }
 
-/* Check if vessel is delayed */
 function isDelayed(etdStr) {
     if (!etdStr) return false;
     const etdDate = new Date(etdStr);
@@ -687,12 +686,10 @@ function showDialog(rowData) {
   const isLate = isDelayed(rowData["ETD Date and Time"]);
 
   let etdHTML = ETDFormatted;
-  if (isLate) {
-      etdHTML += ' <span class="delayed-text">* Delayed</span>';
-  }
+  if (isLate) etdHTML += ' <span class="delayed-text">* Delayed</span>';
 
   let status = rowData["Status"] || "";
-  if (!rowData["Ramp Num"] || rowData["Ramp Num"].toString().trim() === "") {
+  if (!rowData["Ramp Num"] || String(rowData["Ramp Num"]).trim() === "") {
       status = "Incoming";
   }
 
@@ -714,7 +711,6 @@ function showDialog(rowData) {
     <p><strong>Destination:</strong> ${destination}</p>
   `;
 
-  // Icon logic
   const iconStatus = status.toLowerCase();
   let iconPath = "images/icons/incoming.svg";
   if (iconStatus.includes("unloading")) iconPath = "images/icons/unloading.svg";
@@ -739,45 +735,27 @@ function closeDialog() {
 
 // ==================== SUSPENSION ANNOUNCEMENT ====================
 function showSuspensionAnnouncement(message) {
-  // Hide tables
-  document.querySelectorAll('section.panel').forEach(panel => {
-    panel.style.display = 'none';
-  });
-
-  // Hide section titles
-  document.querySelectorAll('.section-title').forEach(title => {
-    title.style.display = 'none';
-  });
+  document.querySelectorAll('section.panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.section-title').forEach(t => t.style.display = 'none');
 
   let ann = document.getElementById('suspensionAnnouncement');
   if (!ann) {
     ann = document.createElement('div');
     ann.id = 'suspensionAnnouncement';
     ann.style.cssText = `
-      background: rgba(220, 50, 50, 0.97);
-      color: white;
-      padding: 60px 40px;
-      margin: 40px 20px;
-      border-radius: 16px;
-      text-align: center;
-      font-size: 2.1rem;
-      font-weight: 800;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.8);
-      border: 5px solid #ff5555;
-      line-height: 1.5;
-      max-width: 1100px;
-      margin-left: auto;
-      margin-right: auto;
+      background: rgba(220, 50, 50, 0.97); color: white; padding: 60px 40px; margin: 40px 20px;
+      border-radius: 16px; text-align: center; font-size: 2.1rem; font-weight: 800;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 5px solid #ff5555; line-height: 1.5;
+      max-width: 1100px; margin-left: auto; margin-right: auto;
     `;
     document.querySelector('main').prepend(ann);
   }
-
   ann.innerHTML = `
     <strong style="font-size: 2.4rem; display: block; margin-bottom: 30px; letter-spacing: 2px;">
-      ⚠️ TRIPS SUSPENSION ANNOUNCEMENT!
+      ⚠️ TRIPS SUSPENSION ANNOUNCEMENT
     </strong>
     <div style="font-size: 1.85rem; margin: 25px 0; line-height: 1.4;">
-      ${message || "All trips are cancelled due to."}
+      ${message || "All trips are cancelled due to Typhoon."}
     </div>
     <div style="margin-top: 40px; font-size: 1.5rem; font-weight: 500;">
       Please wait for further updates.
@@ -786,23 +764,14 @@ function showSuspensionAnnouncement(message) {
       -TMO-Matnog Management
     </div>
   `;
-
   ann.style.display = 'block';
 }
 
 function hideSuspensionAnnouncement() {
   const ann = document.getElementById('suspensionAnnouncement');
   if (ann) ann.style.display = 'none';
-
-  // Show tables again
-  document.querySelectorAll('section.panel').forEach(panel => {
-    panel.style.display = 'block';
-  });
-
-  // Show section titles again
-  document.querySelectorAll('.section-title').forEach(title => {
-    title.style.display = 'block';
-  });
+  document.querySelectorAll('section.panel').forEach(p => p.style.display = 'block');
+  document.querySelectorAll('.section-title').forEach(t => t.style.display = 'block');
 }
 
 // ==================== UPDATE DASHBOARD ====================
@@ -811,47 +780,62 @@ function updateDashboard(ramps, incoming, suspension, message){
     showSuspensionAnnouncement(message);
     return;
   }
-
   hideSuspensionAnnouncement();
 
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
-  
+
   a.innerHTML = '';
   i.innerHTML = '';
 
   ramps.forEach(r => {
-        const isLate = isDelayed(r["ETD"]);
-        const tr = document.createElement('tr');
-        
-        tr.innerHTML = `
-            <td>${r["Ramp Num"] || "—"}</td>
-            <td>${r["Vessel Name"] || "—"}</td>
-            <td>${r["Shipping Lines"] || "—"}</td>
-            <td>${r["Origin"] || "—"}</td>
-            <td>${r["Next Port"] || "—"}</td>
-            <td class="${isLate ? 'delayed' : ''}">${formatTIME(r["ETD"])}</td>
-            <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"] || "—"}</span></td>`;
-        
-        tr.onclick = () => showDialog(r);
-        a.appendChild(tr);
-    });
+    const isLate = isDelayed(r["ETD Date and Time"]);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${r["Ramp Num"]||"—"}</td>
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
+      <td>${r["Next Port"]||"—"}</td>
+      <td class="${isLate ? 'delayed-etd' : ''}">${formatTIME(r["ETD Date and Time"])}</td>
+      <td><span class="status ${r["Status"]?.toLowerCase().replace(/\s+/g,'-')||''}">${r["Status"]||"—"}</span></td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    a.appendChild(row);
+  });
 
-    incoming.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${r["Vessel Name"] || "—"}</td>
-            <td>${r["Shipping Lines"] || "—"}</td>
-            <td>${r["Last Port"] || "—"}</td>
-            <td>${r["Origin"] || "—"}</td>
-            <td>${formatTIME(r["ETA"])}</td>`;
-        tr.onclick = () => showDialog(r);
-        i.appendChild(tr);
-    });
+  incoming.forEach(r => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${r["Vessel Name"]||"—"}</td>
+      <td>${r["Shipping Lines"]||"—"}</td>
+      <td>${r["Last Port"]||"—"}</td>
+      <td>${r["Origin"]||"—"}</td>
+      <td>${formatTIME(r["ETA Date and Time"])}</td>`;
+    row.addEventListener('click', () => showDialog(r));
+    row.style.cursor = "pointer";
+    i.appendChild(row);
+  });
 }
 
+// ==================== SVG WATCHER ====================
+function initSVGWatcher(){
+  const o = document.getElementById('svgObject');
+  const e = document.getElementById('err');
+  if (!o) return;
+  let loaded = false;
+  o.addEventListener('load', () => loaded = true);
+  setTimeout(() => {
+    try {
+      const doc = o.contentDocument;
+      if (!doc || !doc.rootElement) throw new Error();
+    } catch {
+      if (!loaded) e.style.display = 'block';
+    }
+  }, 800);
+}
 
-// ==================== FETCH WITH ETAG (Better Performance) ====================
+// ==================== FETCH ====================
 async function fetchJSON() {
   const loadingText = "Updating...";
   document.getElementById('activeBody').innerHTML = `<tr><td colspan="7">${loadingText}</td></tr>`;
@@ -860,38 +844,23 @@ async function fetchJSON() {
   const apiUrl = "https://api.github.com/repos/reyvincentestayan10-afk/matnog-dashboard/contents/dashboard_data.json";
 
   try {
-    const headers = {
-      "Accept": "application/vnd.github.v3.raw",
-      "Cache-Control": "no-cache"
-    };
+    const headers = { "Accept": "application/vnd.github.v3.raw", "Cache-Control": "no-cache" };
     if (lastETag) headers["If-None-Match"] = lastETag;
 
     const res = await fetch(apiUrl, { headers });
-
     if (res.status === 304) return;
-    if (!res.ok) throw new Error("Failed to fetch");
-
+    if (!res.ok) throw new Error();
     const data = await res.json();
     lastETag = res.headers.get('ETag');
-
-    updateDashboard(
-      data.latestRampOccupants || [], 
-      data.incomingVessels || [],
-      data.suspension,
-      data.suspensionMessage
-    );
-
+    updateDashboard(data.latestRampOccupants || [], data.incomingVessels || [], data.suspension, data.suspensionMessage);
   } catch (e) {
-    console.warn("GitHub API failed, trying direct fetch...", e);
     try {
       const res = await fetch(oneDriveJSON + "?t=" + Date.now());
       if (res.ok) {
         const data = await res.json();
         updateDashboard(data.latestRampOccupants || [], data.incomingVessels || [], data.suspension, data.suspensionMessage);
       }
-    } catch (e2) {
-      console.error("Both fetch methods failed", e2);
-    }
+    } catch (e2) {}
   }
 }
 
@@ -907,9 +876,9 @@ function updateClock(){
 // ==================== START ====================
 setInterval(updateClock, 1000);
 updateClock();
-
 fetchJSON();
 setInterval(fetchJSON, 18000);
+initSVGWatcher();
 
 window.onclick = e => {
   if (e.target.id === 'dialogOverlay') closeDialog();
