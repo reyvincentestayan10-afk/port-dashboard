@@ -648,21 +648,18 @@ td.delayed-etd {
 
 <script>
 const oneDriveJSON = "https://raw.githubusercontent.com/reyvincentestayan10-afk/matnog-dashboard/main/dashboard_data.json";
+let lastETag = null;
 
-/* Format time (HHMM -> HH:MM) */
+// ==================== FORMAT TIME ====================
 function formatTIME(dt){
   if (!dt) return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
-
   const d = new Date(dt);
   if (isNaN(d)) return "To be announced";
-
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   const yyyy = d.getFullYear();
-
   const hh = String(d.getHours()).padStart(2, '0');
   const min = String(d.getMinutes()).padStart(2, '0');
-
   return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
 }
 
@@ -674,6 +671,7 @@ function isDelayed(etdStr) {
     return new Date() > etdDate;
 }
 
+// ==================== DIALOG ====================
 function showDialog(rowData) {
   const overlay = document.getElementById('dialogOverlay');
   const dialog = document.getElementById('dialog');
@@ -681,43 +679,32 @@ function showDialog(rowData) {
   const title = document.getElementById('dialogTitle');
   const wrapper = document.getElementById('wrapper');
 
-  // Reset dialog
   body.innerHTML = '';
   title.textContent = rowData["Vessel Name"] || "Vessel Details";
 
   const ETA = formatTIME(rowData["ETA Date and Time"]);
   let ETDFormatted = formatTIME(rowData["ETD Date and Time"]);
-  
   const isLate = isDelayed(rowData["ETD Date and Time"]);
-  
+
   let etdHTML = ETDFormatted;
   if (isLate) {
       etdHTML += ' <span class="delayed-text">* Delayed</span>';
-  } else if (!rowData["ETD Date and Time"]) {
-      etdHTML = `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
   }
 
-  // Determine status
   let status = rowData["Status"] || "";
   if (!rowData["Ramp Num"] || rowData["Ramp Num"].toString().trim() === "") {
       status = "Incoming";
   }
 
-  // Set origin and destination
   let origin = rowData["Origin"] || "—";
   let destination = rowData["Next Port"] || "—";
-
   if (status === "Incoming") {
-      origin = rowData["Last Port"] || "—";      // swap for incoming
+      origin = rowData["Last Port"] || "—";
       destination = rowData["Origin"] || "—";
   }
 
-  // ETA line
-  const etaLine = status === "Incoming"
-      ? `<p><strong>Estimated Arrival:</strong> ${ETA || "—"}</p>`
-      : "";
+  const etaLine = status === "Incoming" ? `<p><strong>Estimated Arrival:</strong> ${ETA || "—"}</p>` : "";
 
-  // Build dialog body
   body.innerHTML = `
     <p><strong>Shipping Line:</strong> ${rowData["Shipping Lines"] || "—"}</p>
     <p><strong>Status:</strong> ${status || "—"}</p>
@@ -727,7 +714,7 @@ function showDialog(rowData) {
     <p><strong>Destination:</strong> ${destination}</p>
   `;
 
-  // Determine icon
+  // Icon logic
   const iconStatus = status.toLowerCase();
   let iconPath = "images/icons/incoming.svg";
   if (iconStatus.includes("unloading")) iconPath = "images/icons/unloading.svg";
@@ -737,16 +724,8 @@ function showDialog(rowData) {
   else if (iconStatus.includes("anchorage")) iconPath = "images/icons/anchorage.svg";
   else if (iconStatus.includes("cancelled")) iconPath = "images/icons/cancelled.svg";
 
-  wrapper.innerHTML = `
-    <object 
-      data="${iconPath}?v=${Date.now()}" 
-      type="image/svg+xml" 
-      class="icon-svg" 
-      style="pointer-events:none; display:block; margin:0 auto;">
-    </object>
-  `;
+  wrapper.innerHTML = `<object data="${iconPath}?v=${Date.now()}" type="image/svg+xml" style="pointer-events:none; display:block; margin:0 auto;"></object>`;
 
-  // Show dialog
   overlay.classList.add("active");
   dialog.classList.add("active");
 }
@@ -754,33 +733,13 @@ function showDialog(rowData) {
 function closeDialog() {
   const dialog = document.getElementById('dialog');
   const overlay = document.getElementById('dialogOverlay');
-  const body = document.getElementById('dialogBody');
-  const wrapper = document.getElementById('wrapper');
-
   dialog.classList.remove('active');
   overlay.classList.remove('active');
-
-  // Reset after fade-out
-  setTimeout(() => {
-    body.innerHTML = '';
-    wrapper.innerHTML = '';
-  }, 200);
 }
 
-document.addEventListener('click', function(e) {
-  const dialog = document.getElementById('dialog');
-  const overlay = document.getElementById('dialogOverlay');
-
-  // only close if overlay is visible, click target IS the overlay itself
-  if (overlay.classList.contains('active') && e.target === overlay) {
-    closeDialog();
-  }
-});
-
+// ==================== SUSPENSION ANNOUNCEMENT ====================
 function showSuspensionAnnouncement(message) {
-  document.querySelectorAll('section.panel').forEach(panel => {
-    panel.style.display = 'none';
-  });
+  document.querySelectorAll('section.panel').forEach(panel => panel.style.display = 'none');
 
   let ann = document.getElementById('suspensionAnnouncement');
   if (!ann) {
@@ -811,13 +770,10 @@ function showSuspensionAnnouncement(message) {
 function hideSuspensionAnnouncement() {
   const ann = document.getElementById('suspensionAnnouncement');
   if (ann) ann.style.display = 'none';
-
-  document.querySelectorAll('section.panel').forEach(panel => {
-    panel.style.display = 'block';
-  });
+  document.querySelectorAll('section.panel').forEach(panel => panel.style.display = 'block');
 }
 
-/* Update tables */
+// ==================== UPDATE DASHBOARD ====================
 function updateDashboard(ramps, incoming, suspension, message){
   if (suspension === "yes" || suspension === true || suspension === "true") {
     showSuspensionAnnouncement(message);
@@ -825,18 +781,18 @@ function updateDashboard(ramps, incoming, suspension, message){
   }
 
   hideSuspensionAnnouncement();
-  
+
   const a = document.getElementById('activeBody');
   const i = document.getElementById('incomingBody');
+  
   a.innerHTML = '';
   i.innerHTML = '';
 
-  ramps.forEach(r=>{
-	const isLate = isDelayed(r["ETD Date and Time"]);
+  ramps.forEach(r => {
+    const isLate = isDelayed(r["ETD Date and Time"]);
     const row = document.createElement('tr');
-	
-	let etdDisplay = formatTIME(r["ETD Date and Time"]);
-	
+    const etdDisplay = formatTIME(r["ETD Date and Time"]);
+    
     row.innerHTML = `
       <td>${r["Ramp Num"]||"—"}</td>
       <td>${r["Vessel Name"]||"—"}</td>
@@ -851,7 +807,7 @@ function updateDashboard(ramps, incoming, suspension, message){
     a.appendChild(row);
   });
 
-  incoming.forEach(r=>{
+  incoming.forEach(r => {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${r["Vessel Name"]||"—"}</td>
@@ -863,8 +819,71 @@ function updateDashboard(ramps, incoming, suspension, message){
     row.style.cursor = "pointer";
     i.appendChild(row);
   });
+
+  updateLastUpdatedTime();
 }
-/* Real-time clock */
+
+// ==================== LAST UPDATED ====================
+function updateLastUpdatedTime() {
+  let note = document.getElementById('last-updated');
+  if (!note) {
+    note = document.createElement('div');
+    note.id = 'last-updated';
+    note.style.cssText = 'text-align: right; font-size: 0.85rem; color: #2ad36a; margin-top: 12px;';
+    document.querySelector('main').appendChild(note);
+  }
+  note.textContent = `Last updated: ${new Date().toLocaleTimeString('en-US', {hour12: false})}`;
+}
+
+// ==================== FETCH WITH ETAG (Better Performance) ====================
+async function fetchJSON() {
+  const loadingText = "Updating...";
+  document.getElementById('activeBody').innerHTML = `<tr><td colspan="7">${loadingText}</td></tr>`;
+  document.getElementById('incomingBody').innerHTML = `<tr><td colspan="5">${loadingText}</td></tr>`;
+
+  const apiUrl = "https://api.github.com/repos/reyvincentestayan10-afk/matnog-dashboard/contents/dashboard_data.json";
+
+  try {
+    const headers = {
+      "Accept": "application/vnd.github.v3.raw",
+      "Cache-Control": "no-cache"
+    };
+    if (lastETag) headers["If-None-Match"] = lastETag;
+
+    const res = await fetch(apiUrl, { headers });
+
+    if (res.status === 304) {
+      updateLastUpdatedTime();
+      return;
+    }
+
+    if (!res.ok) throw new Error("API error");
+
+    const data = await res.json();
+    lastETag = res.headers.get('ETag');
+
+    updateDashboard(
+      data.latestRampOccupants || [], 
+      data.incomingVessels || [],
+      data.suspension,
+      data.suspensionMessage
+    );
+
+  } catch (e) {
+    console.warn("GitHub API failed, trying direct fetch...", e);
+    try {
+      const res = await fetch(oneDriveJSON + "?t=" + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        updateDashboard(data.latestRampOccupants || [], data.incomingVessels || [], data.suspension, data.suspensionMessage);
+      }
+    } catch (e2) {
+      console.error("Both fetch methods failed", e2);
+    }
+  }
+}
+
+// ==================== CLOCK ====================
 function updateClock(){
   const d = new Date();
   const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
@@ -873,39 +892,16 @@ function updateClock(){
   document.getElementById('currentTime').textContent = timeStr;
 }
 
-/* Fetch JSON */
-async function fetchJSON(){
-  try {
-    const url = `${oneDriveJSON}?nocache=${Date.now()}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    updateDashboard(data.latestRampOccupants||[], data.incomingVessels||[]);
-  } catch(e) {
-    console.error('Fetch error:', e);
-  }
-}
-/* SVG watcher */
-function initSVGWatcher(){
-  const o=document.getElementById('svgObject');
-  const e=document.getElementById('err');
-  if(!o)return;
-  let loaded=false;
-  o.addEventListener('load',()=>loaded=true);
-  setTimeout(()=>{
-    try{
-      const doc=o.contentDocument;
-      if(!doc||!doc.rootElement) throw Error();
-    }catch{
-      if(!loaded){ e.style.display='block'; }
-    }
-  },400);
-}
-
-/* Start updates */
+// ==================== START ====================
 setInterval(updateClock, 1000);
 updateClock();
+
 fetchJSON();
 setInterval(fetchJSON, 18000);
+
+window.onclick = e => {
+  if (e.target.id === 'dialogOverlay') closeDialog();
+};
 
 </script>
 </body>
