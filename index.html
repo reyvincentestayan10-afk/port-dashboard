@@ -824,7 +824,7 @@ function updateDashboard(ramps, incoming, suspension, message){
 
 <<<<<<< Updated upstream
     ramps.forEach(r => {
-        const isLate = isDelayed(r["ETD Date and Time"]);
+        const isLate = isDelayed(r["ETD"]);
         const tr = document.createElement('tr');
         
         tr.innerHTML = `
