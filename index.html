@@ -20,6 +20,7 @@
   --standby:#f2c94c;
   --standby-dep:#ff9a43;
   --anchorage:#6b7380;
+  --cancelled: #e74c3c;
   --radius:10px;
 
 }
@@ -258,7 +259,6 @@ tbody tr:nth-child(odd) {
   color: #071018;
 }
 
-/* Force blinking animation to apply correctly */
 .status.loading {
   background: var(--loading);
   animation: blinkLoading 1.2s ease-in-out infinite;
@@ -271,6 +271,7 @@ tbody tr:nth-child(odd) {
 }
 
 .status.anchorage { background: var(--anchorage); color: #fff; opacity: .92; }
+.status.cancelled { background: var(--cancelled); color: #fff; opacity: .95; font-weight: 700; }
 .status.unloading { background: var(--unloading); color: #071018; opacity: .92;  }
 
 .status[class*="standby"][class*="load"],
@@ -660,6 +661,11 @@ let lastETag = null;
 
 // ==================== FORMAT TIME & DELAY ====================
 function formatTIME(dt){
+
+  if (status && status.toLowerCase().includes("cancelled")) {
+    return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
+  }
+
   if (!dt) return `<span style="color:#f2c94c; font-style:italic;">To be announced</span>`;
   const d = new Date(dt);
   if (isNaN(d)) return "To be announced";
